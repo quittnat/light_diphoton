@@ -14,6 +14,7 @@
 #include <iostream>
 #include "TH1F.h"
 #include "TRandom3.h"
+using namespace std;
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -272,44 +273,51 @@ public :
    TBranch        *b_jet_energy;   //!
 
    //own varialbles
-  TH1F *EB_temp;
-  TH1F *EB_si;
- TH1F *m1EE_temp ;
- TH1F *EE_temp;
- TH1F *m1EE_si;
-  TH1F *EE_si;
- TH1F *m1EE_pt;
- TH1F *m1EE_diphopt;
-  TH1F *m1EE_diphomass;
- TH1F *EE_diphomass;
-  TH1F *EB_diphomass;
+  TH1F *h_iso;
+  TH1F *h_sieie;
+  TH1F *h_pt;
+   TH1F *h_diphopt;
+  TH1F *h_diphomass;
   TH1F *h_weight;
-   Bool_t do2dstd; 
+  TString inputtreename;
+  Bool_t do2dstd; 
    Bool_t do2dff;
    Bool_t do2dpp;
    Bool_t do2d1side;
    Bool_t do1p1f;
    Bool_t do2dside;
-   Bool_t dorcone;
+   Bool_t do2drcone;
    Bool_t isdata;
+  TString realdata;
+   TString etarange;
+   Int_t kSignal_l;
+   Int_t kElectron_l;
+   Int_t kSignal_t;
+   Int_t kElectron_t;
    Float_t roovar1;
    Float_t roovar2;
+   Int_t rootruth1;
+   Int_t rootruth2;
    Float_t roopt1;
    Float_t roopt2;
    Float_t roosieie1;
    Float_t roosieie2;
    Float_t rooeta1;
    Float_t rooeta2;
+   Float_t roodiphopt;
    Float_t roorho;
    Float_t roosigma;
    Float_t roonvtx;
    Float_t rooweight;
   Int_t nbins; 
+  
  TRandom3 *randomgen;
+ TString seta; TString name; TString sel;
+ Bool_t EBEB;Bool_t m1EE;Bool_t EEEE;Bool_t fulletarange;
 
 
  
-   light(TString, TString, Bool_t);
+   light(TString, TString,TString, TString,TString);
    virtual ~light();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -326,7 +334,7 @@ public :
 
 
 #ifdef light_cxx
-light::light(TString filename, TString treename, Bool_t realdata) : fChain(0) 
+light::light(TString filename, TString treename,TString _sel,TString _etarange, TString _realdata) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -341,67 +349,10 @@ TTree *tree;
   // }
    Init(tree);
   TH1F::SetDefaultSumw2(kTRUE);
-
-
-  Float_t xstart=400.;
-        nbins=46;
-        Float_t xbins[46];
-        xbins[0]=0.;
-        for(int i=0 ; i <nbins ; i++){
-        if (xbins[i] < xstart)  xbins[i+1]= xbins[i]+10;
-        else if ( xstart <= xbins[i] < 1000)  xbins[i+1]=xbins[i]+100;
-
-}
-
- EB_temp= new TH1F("EB_temp","EB_temp",90, 0.,9.);
- EB_si= new TH1F("EB_si","EB_si", 400, 0, 0.04);
-  m1EE_temp= new TH1F("m1EE_temp","m1EE_temp", 90, 0., 9.);
-  EE_temp= new TH1F("EE_temp","EE_temp", 90, 0., 9.);
- m1EE_si= new TH1F("m1EE_si","m1EE_si", 400, 0, 0.04);
-  EE_si= new TH1F("EE_si","EE_si", 400, 0, 0.04);
- m1EE_pt= new TH1F("m1EE_pt","m1EE_pt", 200, 0., 200.);
-m1EE_diphopt= new TH1F("m1EE_diphopt","m1EE_diphopt", 600, 0., 600.);
-  m1EE_diphomass= new TH1F("m1EE_diphomass","m1EE_diphomass", nbins, xbins);
-  EE_diphomass= new TH1F("EE_diphomass","EE_diphomass", nbins, xbins);
-  EB_diphomass= new TH1F("EB_diphomass","EB_diphomass", nbins, xbins);
-  h_weight =new TH1F("h_weight","h_weight", 500, 0.,50.); 
-  do2dstd=false;
-   do2dff=false;
-   do2dpp=false;
-   do2d1side=false;
-   do2dside=false;
-   do1p1f=false;
-   dorcone=false;
-   isdata= realdata;
-   if(treename== "Tree_2Dtruebkgbkg_template"){do2dff=true;}
-   else if(treename== "Tree_2Dstandard_selection"){do2dstd=true;}
-   else if(treename== "Tree_2Dsideband_template"){do2dside=true;}
-   else if(treename== "Tree_2Dtruesigsig_template"){do2dpp=true; }
-   else if(treename== "Tree_2Drandomcone_template"){dorcone=true;}
-   else if(treename== "Tree_2Drandomconesideband_template"){do2d1side=true;}
-   //141024 keep in mind no gen prompt anymore!
-   else if(treename== "Tree_2Dgenpromptplussideband_template"){do2d1side=true;}
-   else if(treename== "Tree_2Dtruesigbkg_template"){do1p1f=true;isdata=false;}
-   //TFile *f ;
-//TTree *tree ;
-//tree->Branch("roodset_signal",&roovar1,"roovar1/F:roovar1:roovar2:rooeta1:rooeta2:roopt1:roopt2:roosieie1:roosieie2:rooweight:roorho:roosigma:rooweight");
-//TBranch* b1;
- randomgen = new TRandom3(0);
-
-  roovar1 = -999;
-  roovar2 = -999;
-  rooeta1 = -999;
-  rooeta2 = -999;
-  roopt1 = -999;
-  roopt2 = -999;
-  roosieie1 = -999;
-  roosieie2 = -999;
-  roorho = -999;
-  roosigma = -999;
-  roonvtx = -999;
-  rooweight = -999;
-
-
+inputtreename=treename;
+realdata=_realdata;
+etarange=_etarange;
+sel= _sel;
 }
 
 light::~light()

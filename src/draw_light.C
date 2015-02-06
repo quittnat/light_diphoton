@@ -15,7 +15,7 @@
 Bool_t logplot=kFALSE;
 Boo_t compplots=kFALSE;
 Bool_t diphomass=kFALSE;
-Bool_t correlation=kTrue;
+Bool_t vertex_plots=kTrue;
 Bool_t isdata=kFALSE;
 Bool_t ratioplot=kFALSE;
 void draw_light(){
@@ -61,8 +61,6 @@ else if(diphomass){
          h8=(TH1F*)f8->Get("EE_diphomass");
          h9=(TH1F*)f9->Get("EE_diphomass"); 
 	}
-if(corrplots){}
-if(ratiolot){
  // ratio plots
         TH1F *r1 = (TH1F*)h2->Clone("r1");
 	r1->Divide(h1);
@@ -185,7 +183,7 @@ else {
    c2->SetGridx();
    h4->SetMarkerColor(kBlue+1);h4->SetLineColor(kBlue+1);h4->SetMarkerStyle(20);
    if(diphomass){h4->SetTitle("min. one photon in EE, diphoton mass if both in signal band");h4->GetXaxis()->SetTitle("Diphoton mass (GeV)"); }
-   else{  h4->SetTitle("min. one photon in EE, isolation for 2 candidates in signa");    h4->GetXaxis()->SetTitle("Charged Iso (GeV)");}
+   else{  h4->SetTitle("min. one photon in EE, isolation for 2 candidates in signal band");    h4->GetXaxis()->SetTitle("Charged Iso (GeV)");}
    h5->SetMarkerColor(kRed+1);h5->SetLineColor(kRed+1); h5->SetMarkerStyle(20);
    //h6->SetMarkerColor(kGreen-3); h6->SetMarkerStyle(20);h6->SetLineColor(kGreen-3);
    //  h6->Draw();

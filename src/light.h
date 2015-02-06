@@ -14,6 +14,8 @@
 #include <iostream>
 #include "TH1F.h"
 #include "TRandom3.h"
+#include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
 using namespace std;
 // Header file for the classes stored in the TTree if any.
 
@@ -78,8 +80,35 @@ public :
    Int_t           photrail_PhoPassConversionVeto;
    Float_t         pholead_GenPhotonIsoDR04;
    Float_t         photrail_GenPhotonIsoDR04;
+
+   Float_t         pholead_GenPhotonPt;
+   Float_t         photrail_GenPhotonPt;
    Int_t           pholead_PhoMCmatchexitcode;
    Int_t           photrail_PhoMCmatchexitcode;
+   Int_t		   diphoton_h2ggvtx;
+   Float_t         diphoton_h2ggvtx_Vx ;
+   Float_t         diphoton_h2ggvtx_Vy ;
+   Float_t         diphoton_h2ggvtx_Vz ;
+   Int_t           pholead_vtxworstiso ;
+   Int_t           photrail_vtxworstiso;
+   Float_t         pholead_isoh2ggvtx;
+   Float_t 	       photrail_isoh2ggvtx ;
+   Float_t 	       pholead_rconeh2ggvtx;
+   Float_t 	       photrail_rconeh2ggvtx;
+   Float_t         pholead_std_Vx; 
+   Float_t			pholead_std_Vy;
+   Float_t			pholead_std_Vz;
+   Float_t			 photrail_std_Vx;
+   Float_t			photrail_std_Vy;
+   Float_t			photrail_std_Vz;
+   Float_t			 primVtxx;
+   Float_t			 primVtxy;
+   Float_t			primVtxz;
+   Float_t			  primVtxPtSum;
+   Float_t			pholead_worstiso;
+   Float_t		  pholead_worstiso_rcone;
+   Float_t			photrail_worstiso;
+   Float_t 			photrail_worstiso_rcone;
    Float_t         mulead_pt;
    Float_t         mutrail_pt;
    Float_t         mulead_eta;
@@ -202,8 +231,36 @@ public :
    TBranch        *b_photrail_PhoPassConversionVeto;   //!
    TBranch        *b_pholead_GenPhotonIsoDR04;   //!
    TBranch        *b_photrail_GenPhotonIsoDR04;   //!
+   
+   TBranch        *b_pholead_GenPhotonPt;   //!
+   TBranch        *b_photrail_GenPhotonPt;   //!
    TBranch        *b_pholead_PhoMCmatchexitcode;   //!
    TBranch        *b_photrail_PhoMCmatchexitcode;   //!
+   TBranch        *b_diphoton_h2ggvtx;
+   TBranch        *b_diphoton_h2ggvtx_Vx ;
+   TBranch        *b_diphoton_h2ggvtx_Vy ;
+   TBranch        *b_diphoton_h2ggvtx_Vz ;
+   TBranch        *b_pholead_vtxworstiso ;
+   TBranch        *b_photrail_vtxworstiso;
+   TBranch        *b_pholead_isoh2ggvtx;
+   TBranch        *b_photrail_isoh2ggvtx ;
+   TBranch        *b_pholead_rconeh2ggvtx;
+   TBranch        *b_photrail_rconeh2ggvtx;
+   TBranch        *b_pholead_std_Vx;
+   TBranch        *b_pholead_std_Vy;
+   TBranch        *b_pholead_std_Vz;
+   TBranch        *b_photrail_std_Vx;
+   TBranch        *b_photrail_std_Vy;
+   TBranch        *b_photrail_std_Vz;
+   TBranch        *b_primVtxx;
+   TBranch        *b_primVtxy;
+   TBranch        *b_primVtxz;
+   TBranch        *b_primVtxPtSum;
+   TBranch        *b_pholead_worstiso;
+   TBranch        *b_pholead_worstiso_rcone;
+   TBranch        *b_photrail_worstiso;
+   TBranch        *b_photrail_worstiso_rcone;
+
    TBranch        *b_mulead_pt;   //!
    TBranch        *b_mutrail_pt;   //!
    TBranch        *b_mulead_eta;   //!
@@ -273,12 +330,17 @@ public :
    TBranch        *b_jet_energy;   //!
 
    //own varialbles
-  TH1F *h_iso;
+  TH1F *h_iso;TH1F* h_isopv;TH1F* h_isogen;
   TH1F *h_sieie;
   TH1F *h_pt;
-   TH1F *h_diphopt;
+  TH1F *h_diphopt;
+  TH1F *h_pv_diphopt;
   TH1F *h_diphomass;
   TH1F *h_weight;
+  TH1F *h_h2ggv_diphopt;
+ // TEfficiency* h_h2ggv_diphopt;
+  TGraphAsymmErrors* eff_h2ggv_diphopt;
+  TGraphAsymmErrors* eff_pv_diphopt;
   TString inputtreename;
   Bool_t do2dstd; 
    Bool_t do2dff;
@@ -294,7 +356,9 @@ public :
    Int_t kElectron_l;
    Int_t kSignal_t;
    Int_t kElectron_t;
+   Float_t rooisopv1; Float_t rooisopv2;
    Float_t roovar1;
+   Float_t rooisowv1; Float_t rooisowv2;
    Float_t roovar2;
    Int_t rootruth1;
    Int_t rootruth2;
@@ -450,9 +514,41 @@ void light::Init(TTree *tree)
    fChain->SetBranchAddress("photrail_PhoPassConversionVeto", &photrail_PhoPassConversionVeto, &b_photrail_PhoPassConversionVeto);
    fChain->SetBranchAddress("pholead_GenPhotonIsoDR04", &pholead_GenPhotonIsoDR04, &b_pholead_GenPhotonIsoDR04);
    fChain->SetBranchAddress("photrail_GenPhotonIsoDR04", &photrail_GenPhotonIsoDR04, &b_photrail_GenPhotonIsoDR04);
+
+//   fChain->SetBranchAddress("pholead_GenPhotonPt", &pholead_GenPhotonPt, &b_pholead_GenPhotonPt);
+ //  fChain->SetBranchAddress("photrail_GenPhotonPt", &photrail_GenPhotonPt, &b_photrail_GenPhotonPt);
    fChain->SetBranchAddress("pholead_PhoMCmatchexitcode", &pholead_PhoMCmatchexitcode, &b_pholead_PhoMCmatchexitcode);
    fChain->SetBranchAddress("photrail_PhoMCmatchexitcode", &photrail_PhoMCmatchexitcode, &b_photrail_PhoMCmatchexitcode);
-/*   fChain->SetBranchAddress("mulead_pt", &mulead_pt, &b_mulead_pt);
+
+    fChain->SetBranchAddress("pholead_std_Vx",&pholead_std_Vx, &b_pholead_std_Vx);
+    fChain->SetBranchAddress("pholead_std_Vy",&pholead_std_Vy, &b_pholead_std_Vy);
+    fChain->SetBranchAddress("pholead_std_Vz",&pholead_std_Vz, &b_pholead_std_Vz);
+    fChain->SetBranchAddress("photrail_std_Vx",&photrail_std_Vx, &b_photrail_std_Vx);
+    fChain->SetBranchAddress("photrail_std_Vy",&photrail_std_Vy, &b_photrail_std_Vy);
+    fChain->SetBranchAddress("photrail_std_Vz",&photrail_std_Vz, &b_photrail_std_Vz);
+    fChain->SetBranchAddress("diphoton_h2ggvtx",&diphoton_h2ggvtx, &b_diphoton_h2ggvtx);
+    fChain->SetBranchAddress("diphoton_h2ggvtx_Vx",&diphoton_h2ggvtx_Vx, &b_diphoton_h2ggvtx_Vx);
+    fChain->SetBranchAddress("diphoton_h2ggvtx_Vy",&diphoton_h2ggvtx_Vy, &b_diphoton_h2ggvtx_Vy);
+    fChain->SetBranchAddress("diphoton_h2ggvtx_Vz",&diphoton_h2ggvtx_Vz, &b_diphoton_h2ggvtx_Vz);
+    fChain->SetBranchAddress("primVtxx",&primVtxx, &b_primVtxx);
+    fChain->SetBranchAddress("primVtxy",&primVtxy, &b_primVtxy);
+    fChain->SetBranchAddress("primVtxz",&primVtxz, &b_primVtxz);
+    fChain->SetBranchAddress("primVtxPtSum",&primVtxPtSum, &b_primVtxPtSum);
+    fChain->SetBranchAddress("pholead_vtxworstiso",&pholead_vtxworstiso, &b_pholead_vtxworstiso);
+    fChain->SetBranchAddress("pholead_worstiso",&pholead_worstiso,  &b_pholead_worstiso);
+    fChain->SetBranchAddress("pholead_worstiso_rcone",&pholead_worstiso_rcone, &b_pholead_worstiso_rcone);
+    fChain->SetBranchAddress("photrail_vtxworstiso",&photrail_vtxworstiso, &b_photrail_vtxworstiso);
+    fChain->SetBranchAddress("photrail_worstiso",&photrail_worstiso, &b_photrail_worstiso);
+    fChain->SetBranchAddress("photrail_worstiso_rcone",&photrail_worstiso_rcone, &b_photrail_worstiso_rcone);
+    fChain->SetBranchAddress("pholead_isoh2ggvtx",&pholead_isoh2ggvtx, &b_pholead_isoh2ggvtx);
+    fChain->SetBranchAddress("photrail_isoh2ggvtx",&photrail_isoh2ggvtx, &b_photrail_isoh2ggvtx);
+    fChain->SetBranchAddress("pholead_rconeh2ggvtx",&pholead_rconeh2ggvtx, &b_pholead_rconeh2ggvtx);
+    fChain->SetBranchAddress("photrail_rconeh2ggvtx",&photrail_rconeh2ggvtx, &b_photrail_rconeh2ggvtx);  
+   
+   
+   
+   
+   /*   fChain->SetBranchAddress("mulead_pt", &mulead_pt, &b_mulead_pt);
    fChain->SetBranchAddress("mutrail_pt", &mutrail_pt, &b_mutrail_pt);
    fChain->SetBranchAddress("mulead_eta", &mulead_eta, &b_mulead_eta);
    fChain->SetBranchAddress("mutrail_eta", &mutrail_eta, &b_mutrail_eta);

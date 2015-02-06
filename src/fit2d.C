@@ -129,6 +129,12 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
   //disables all branches
   t->SetBranchStatus("*",0);
 
+
+  float v_rooisopv1;
+  float v_rooisopv2;
+
+  float v_rooisowv1;
+  float v_rooisowv2;
   float v_roovar1;
   float v_roovar2;
   float v_roopt1;
@@ -145,6 +151,11 @@ float v_roodiphopt;
 
   TBranch *b_roovar1;
   TBranch *b_roovar2;
+
+  TBranch *b_rooisopv1;
+  TBranch *b_rooisopv2;
+  TBranch *b_rooisowv1;
+  TBranch *b_rooisowv2;
   TBranch *b_roopt1;
   TBranch *b_roosieie1;
   TBranch *b_rooeta1;

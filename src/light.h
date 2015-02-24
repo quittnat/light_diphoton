@@ -82,7 +82,17 @@ public :
    Float_t         photrail_GenPhotonIsoDR04;
 
    Float_t         pholead_GenPhotonPt;
+   Float_t         pholead_GenPhotonPhi;
+   Float_t         pholead_GenPhotonEta;
+   Float_t         pholead_GenVx;
+   Float_t         pholead_GenVy;
+   Float_t         pholead_GenVz;
    Float_t         photrail_GenPhotonPt;
+   Float_t         photrail_GenPhotonPhi;
+   Float_t         photrail_GenPhotonEta;
+   Float_t         photrail_GenVx;
+   Float_t         photrail_GenVy;
+   Float_t         photrail_GenVz;
    Int_t           pholead_PhoMCmatchexitcode;
    Int_t           photrail_PhoMCmatchexitcode;
    Int_t		   diphoton_h2ggvtx;
@@ -106,9 +116,9 @@ public :
    Float_t			primVtxz;
    Float_t			  primVtxPtSum;
    Float_t			pholead_worstiso;
-   Float_t		  pholead_worstiso_rcone;
+   Float_t		  pholead_worstrcone;
    Float_t			photrail_worstiso;
-   Float_t 			photrail_worstiso_rcone;
+   Float_t 			photrail_worstrcone;
    Float_t         mulead_pt;
    Float_t         mutrail_pt;
    Float_t         mulead_eta;
@@ -233,7 +243,17 @@ public :
    TBranch        *b_photrail_GenPhotonIsoDR04;   //!
    
    TBranch        *b_pholead_GenPhotonPt;   //!
+   TBranch        *b_pholead_GenPhotonPhi;   //!
+   TBranch        *b_pholead_GenPhotonEta;   //!
+   TBranch        *b_pholead_GenVx;   //!
+   TBranch        *b_pholead_GenVy;   //!
+   TBranch        *b_pholead_GenVz;   //!
    TBranch        *b_photrail_GenPhotonPt;   //!
+   TBranch        *b_photrail_GenPhotonPhi;   //!
+   TBranch        *b_photrail_GenPhotonEta;   //!
+   TBranch        *b_photrail_GenVx;   //!
+   TBranch        *b_photrail_GenVy;   //!
+   TBranch        *b_photrail_GenVz;   //!
    TBranch        *b_pholead_PhoMCmatchexitcode;   //!
    TBranch        *b_photrail_PhoMCmatchexitcode;   //!
    TBranch        *b_diphoton_h2ggvtx;
@@ -257,9 +277,9 @@ public :
    TBranch        *b_primVtxz;
    TBranch        *b_primVtxPtSum;
    TBranch        *b_pholead_worstiso;
-   TBranch        *b_pholead_worstiso_rcone;
+   TBranch        *b_pholead_worstrcone;
    TBranch        *b_photrail_worstiso;
-   TBranch        *b_photrail_worstiso_rcone;
+   TBranch        *b_photrail_worstrcone;
 
    TBranch        *b_mulead_pt;   //!
    TBranch        *b_mutrail_pt;   //!
@@ -346,9 +366,11 @@ public :
    Bool_t do2dff;
    Bool_t do2dpp;
    Bool_t do2d1side;
+   Bool_t do1f1p;
    Bool_t do1p1f;
    Bool_t do2dside;
    Bool_t do2drcone;
+   Bool_t do2drconeside;
    Bool_t isdata;
   TString realdata;
    TString etarange;
@@ -369,6 +391,7 @@ public :
    Float_t rooeta1;
    Float_t rooeta2;
    Float_t roodiphopt;
+   Float_t roodiphomass;
    Float_t roorho;
    Float_t roosigma;
    Float_t roonvtx;
@@ -515,8 +538,18 @@ void light::Init(TTree *tree)
    fChain->SetBranchAddress("pholead_GenPhotonIsoDR04", &pholead_GenPhotonIsoDR04, &b_pholead_GenPhotonIsoDR04);
    fChain->SetBranchAddress("photrail_GenPhotonIsoDR04", &photrail_GenPhotonIsoDR04, &b_photrail_GenPhotonIsoDR04);
 
-//   fChain->SetBranchAddress("pholead_GenPhotonPt", &pholead_GenPhotonPt, &b_pholead_GenPhotonPt);
- //  fChain->SetBranchAddress("photrail_GenPhotonPt", &photrail_GenPhotonPt, &b_photrail_GenPhotonPt);
+   fChain->SetBranchAddress("pholead_GenPhotonPt", &pholead_GenPhotonPt, &b_pholead_GenPhotonPt);
+   fChain->SetBranchAddress("pholead_GenPhotonPhi", &pholead_GenPhotonPhi, &b_pholead_GenPhotonPhi);
+   fChain->SetBranchAddress("pholead_GenPhotonEta", &pholead_GenPhotonEta, &b_pholead_GenPhotonEta);
+   fChain->SetBranchAddress("pholead_GenVx", &pholead_GenVx, &b_pholead_GenVx);
+   fChain->SetBranchAddress("pholead_GenVy", &pholead_GenVy, &b_pholead_GenVy);
+   fChain->SetBranchAddress("pholead_GenVz", &pholead_GenVz, &b_pholead_GenVz);
+   fChain->SetBranchAddress("photrail_GenPhotonPt", &photrail_GenPhotonPt, &b_photrail_GenPhotonPt);
+   fChain->SetBranchAddress("photrail_GenPhotonPhi", &photrail_GenPhotonPhi, &b_photrail_GenPhotonPhi);
+   fChain->SetBranchAddress("photrail_GenPhotonEta", &photrail_GenPhotonEta, &b_photrail_GenPhotonEta);
+   fChain->SetBranchAddress("photrail_GenVx", &photrail_GenVx, &b_photrail_GenVx);
+   fChain->SetBranchAddress("photrail_GenVy", &photrail_GenVy, &b_photrail_GenVy);
+   fChain->SetBranchAddress("photrail_GenVz", &photrail_GenVz, &b_photrail_GenVz);
    fChain->SetBranchAddress("pholead_PhoMCmatchexitcode", &pholead_PhoMCmatchexitcode, &b_pholead_PhoMCmatchexitcode);
    fChain->SetBranchAddress("photrail_PhoMCmatchexitcode", &photrail_PhoMCmatchexitcode, &b_photrail_PhoMCmatchexitcode);
 
@@ -536,10 +569,10 @@ void light::Init(TTree *tree)
     fChain->SetBranchAddress("primVtxPtSum",&primVtxPtSum, &b_primVtxPtSum);
     fChain->SetBranchAddress("pholead_vtxworstiso",&pholead_vtxworstiso, &b_pholead_vtxworstiso);
     fChain->SetBranchAddress("pholead_worstiso",&pholead_worstiso,  &b_pholead_worstiso);
-    fChain->SetBranchAddress("pholead_worstiso_rcone",&pholead_worstiso_rcone, &b_pholead_worstiso_rcone);
+    fChain->SetBranchAddress("pholead_worstrcone",&pholead_worstrcone, &b_pholead_worstrcone);
     fChain->SetBranchAddress("photrail_vtxworstiso",&photrail_vtxworstiso, &b_photrail_vtxworstiso);
     fChain->SetBranchAddress("photrail_worstiso",&photrail_worstiso, &b_photrail_worstiso);
-    fChain->SetBranchAddress("photrail_worstiso_rcone",&photrail_worstiso_rcone, &b_photrail_worstiso_rcone);
+    fChain->SetBranchAddress("photrail_worstrcone",&photrail_worstrcone, &b_photrail_worstrcone);
     fChain->SetBranchAddress("pholead_isoh2ggvtx",&pholead_isoh2ggvtx, &b_pholead_isoh2ggvtx);
     fChain->SetBranchAddress("photrail_isoh2ggvtx",&photrail_isoh2ggvtx, &b_photrail_isoh2ggvtx);
     fChain->SetBranchAddress("pholead_rconeh2ggvtx",&pholead_rconeh2ggvtx, &b_pholead_rconeh2ggvtx);

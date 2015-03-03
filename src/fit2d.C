@@ -70,6 +70,7 @@ RooRealVar *rooisowv2=NULL;
 RooRealVar *roopt1=NULL;
 RooRealVar *roopt2=NULL;
 RooRealVar *roodiphopt=NULL;
+RooRealVar *roodiphomass=NULL;
 RooRealVar *roosieie1=NULL;
 RooRealVar *roosieie2=NULL;
 RooRealVar *rooeta1=NULL;      
@@ -82,14 +83,24 @@ RooDataSet *dataset_data = NULL;
 RooDataSet *dataset_rcone = NULL;
 RooDataSet *dataset_sideband = NULL;
 RooDataSet *dataset_test = NULL;
+RooDataSet *dataset_test1 = NULL;
 RooDataSet *dset_data = NULL;
 RooDataSet *dset_rcone = NULL;
 RooDataSet *dset_sideb = NULL;
+//RooDataSet *dset_temp = NULL;
+
+//RooDataSet *dset_data_axis1 = NULL;
+//RooDataSet *dset_rcone_axis1 = NULL;
+//RooDataSet *dset_sideb_axis1 = NULL;
+
+
 
 RooRealVar *binning_roovar1=NULL;
 
-bool isdata=kTRUE;
+bool isdata=kFALSE;
 //bins for reweihgting
+RooBinning tbins (0,9); 
+
 const int n_ptbins_forreweighting = 5;
 Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,40,60,100,150,999};
 const int n_diphoptbins_forreweighting = 4;
@@ -115,19 +126,6 @@ int wbins=20;
 int wbins2=20;
 double wxmin2=0.;
 double wxmax2=50.;
-/*TH2F*  w_rhonr=new TH2F("w_rhonr","w_rhonr",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins2,wxmin2,20.);
-TH2F*  w_rho2o=new TH2F("w_rho2o","w_rho2o",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins2,wxmin2,25.);
-TH2F*  w_rhon=new TH2F("w_rhon","w_rhon",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins,wxmin,100.);
-TH2F*  w_rho2=new TH2F("w_rho2","w_rho2",50,0.,50.,wbins2,wxmin2,15);
-TH1F *w_rho= new TH1F("w_rho","w_rho",wbins ,wxmin,100.);
-TH1F *w_rhoo= new TH1F("w_rhoo","w_rhoo",wbins ,wxmin,25.);
-TH2F*  w_sigmanr=new TH2F("w_sigmanr","w_sigmanr",n_sigmabins_forreweighting ,0.,n_sigmabins_forreweighting+1,wbins2,wxmin2,20.);
-TH2F*  w_sigma2o=new TH2F("w_sigma2o","w_sigma2o",n_sigmabins_forreweighting ,0.,n_sigmabins_forreweighting+1,wbins2,wxmin2,25.);
-TH2F*  w_sigman=new TH2F("w_sigman","w_sigman",n_sigmabins_forreweighting ,0.,n_sigmabins_forreweighting+1,wbins,wxmin,100.);
-TH2F*  w_sigma2=new TH2F("w_sigma2","w_sigma2",50,0.,50.,wbins2,wxmin2,15);
-TH1F *w_sigma= new TH1F("w_sigma","w_sigma",wbins ,wxmin,100.);
-TH1F *w_sigmao= new TH1F("w_sigmao","w_sigmao",wbins ,wxmin,25.);
-*/
 TH2F*  w_rhornr=new TH2F("w_rhornr","w_rhornr",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins2,wxmin2,20.);
 TH2F*  w_rhor2o=new TH2F("w_rhor2o","w_rhor2o",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins2,wxmin2,25.);
 TH2F*  w_rhorn=new TH2F("w_rhorn","w_rhorn",n_rhobins_forreweighting ,0.,n_rhobins_forreweighting+1,wbins,wxmin,100.);
@@ -153,8 +151,6 @@ TH2F*  w_etar2=new TH2F("w_etar2","w_etar2",n_etabins_forreweighting,0.,2.5,wbin
 TH1F *w_etar= new TH1F("w_etar","w_etar",wbins ,wxmin,15.);
 TH1F *w_etaro= new TH1F("w_etaro","w_etaro",wbins ,wxmin,10.);
 
-
-
 TH2F*  w_rhonr=new TH2F("w_rhonr","w_rhonr",100 ,0.,100+1,20,wxmin2,2.);
 TH2F*  w_rho2o=new TH2F("w_rho2o","w_rho2o",100 ,0.,100+1,10,wxmin2,10.);
 TH2F*  w_rhon=new TH2F("w_rhon","w_rhon",100 ,0.,100+1,10,wxmin,10.);
@@ -165,15 +161,6 @@ TH2F*  w_sigmanr=new TH2F("w_sigmanr","w_sigmanr",20 ,0.,20+1,20,wxmin2,2.);
 TH2F*  w_sigma2o=new TH2F("w_sigma2o","w_sigma2o",20 ,0.,20+1,10,wxmin2,10.);
 TH2F*  w_sigman=new TH2F("w_sigman","w_sigman",20 ,0.,20+1,10,wxmin,10.);
 TH2F*  w_sigma2=new TH2F("w_sigma2","w_sigma2",20,0.,20.,wbins2,wxmin2,2.);
-//TH1F*  w_sigmasigma=new TH1F("w_sigmasigma","w_sigmasigma",wbins,wxmin,wxmax);
-//TH2F*  w_rhorsigmar2=new TH2F("w_rhorsigmar2","w_rhorsigmar2",50,0.,50.,wbins2,wxmin2,wxmax2);
-//TH1F*  w_sigmarsigmar=new TH1F("w_sigmarsigmar","w_sigmarsigmar",wbins,wxmin,wxmax);
-//TH2F*  w_rhosigmar2=new TH2F("w_rhosigmar2","w_rhosigmar2",50,0.,50.,wbins2,wxmin2,wxmax2);
-//TH2F*  w_rhosigmar3=new TH2F("w_rhosigmar3","w_rhosigmar3",20,0.,20.,wbins2,wxmin2,wxmax2);
-//TH2F*  w_rhosigmar3=new TH2F("w_rhosigmar3","w_rhosigmar3",50,0.,50.,20,0.,20.);
-//TH1F* w_eta=new TH1F("w_eta","w_eta",wbins,wxmin,wxmax);
-//TH1F* w_eta=new TH1F("w_eta","w_eta",25,0.,2.5);
-//TH2F*  w_eta2=new TH2F("w_eta2","w_eta2",25,0.,2.5,wbins2,wxmin2,wxmax2);
 TH2F*  w_diphoptnr=new TH2F("w_diphoptnr","w_diphoptnr",n_diphoptbins_forreweighting ,0.,n_diphoptbins_forreweighting+1,wbins2,wxmin2,20.);
 TH2F*  w_diphopt2o=new TH2F("w_diphopt2o","w_diphopt2o",n_diphoptbins_forreweighting ,0.,n_diphoptbins_forreweighting+1,wbins2,wxmin2,25.);
 TH2F*  w_diphoptn=new TH2F("w_diphoptn","w_diphoptn",n_diphoptbins_forreweighting ,0.,n_diphoptbins_forreweighting+1,wbins,wxmin,100.);
@@ -201,42 +188,62 @@ TH1F *w_ptro= new TH1F("w_ptro","w_ptro",wbins ,wxmin,12.);
   
 //define functions for fit
 void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &roodset);
-int do1dfit();
-int do2dfit();
-//void reweight_rhosigma(TH1F* w_rhosigma,TH2F*w_rhosigma2,TH2F*w_rhosigma3,RooDataSet **dset, RooDataSet *dsetdestination, bool deleteold = kTRUE);
+//int do1dfit(RooDataSet *dset_data_axis1,RooDataSet *dset_sig_axis1,RooDataSet *dset_bkg_axis1,int im);
+int do1dfit(RooDataSet *dset_data_axis1,RooDataSet *dset_sig_axis1,RooDataSet *dset_bkg_axis1,RooDataSet* dset_testbkg,int im);
 void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F*weight_rho2o,TH2F* weight_rhonr, TH2F* weight_rho2,TH2F*weight_sigman,TH2F* weight_sigma2o,TH2F* weight_sigmanr, TH2F* weight_sigma2,RooDataSet **dset, RooDataSet *dsetdestination, bool deleteold = kTRUE);
 void reweight_pt_1d(TH1F* weight_pt,TH1F* weight_pto,TH2F*weight_ptn,TH2F* weight_pt2o,TH2F* weight_ptnr,TH2F*weight_pt2,RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
 void reweight_diphotonpt_1d(TH1F* weight_diphopt,TH1F* weight_diphopto,TH2F*weight_diphoptn,TH2F* weight_diphopt2o,TH2F*weight_diphoptnr,TH2F*weight_diphopt2,RooDataSet **dset, RooDataSet *dsetdestination);
 void reweight_eta_1d(TH1F* weight_eta,TH1F* weight_etao,TH2F*weight_etan,TH2F* weight_eta2o,TH2F* weight_etanr,TH2F*weight_eta2,RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
 void ratioplot(RooDataSet *data_axis1, RooDataSet *truth_axis1, Bool_t logplot);
 void quantiles(TH1F* mass);
+int prep_dataset();
+ void print_mem();
+const int numcpu=1;
+ ProcInfo_t procinfo;
+ void print_mem(){
+	 gSystem->GetProcInfo(&procinfo);
+	 std::cout << "Resident mem (kB): " << procinfo.fMemResident << std::endl;
+	 std::cout << "Virtual mem (kB):  " << procinfo.fMemVirtual << std::endl;
+	 gSystem->Sleep((UInt_t)1e3);
+	  };
+
+
+
+const Int_t nq = 100;
+Double_t prob[nq];  // position where to compute the quantiles in [0,1]
+Double_t dptq[nq];  // array to contain the quantiles
+
 
 void quantiles(TH1F* mass) {
         // demo for quantiles
-        const Int_t nq = 10;
+		cout << "define mass bins " << endl;
         mass->Scale(1.0/mass->Integral());
-        Double_t prob[nq];  // position where to compute the quantiles in [0,1]
-        Double_t yq[nq];  // array to contain the quantiles
-        for (Int_t i=0;i<nq;i++) 
-        //xq[i] = Float_t(i+1)/nq;
-    //    prob[i] =  (0.1+ i*0.1);
+      //  prob[0]=0;
+        for (Int_t i =0;i<nq;i++){ 
         prob[i] =  Float_t(i+1)/nq;
-        mass->GetQuantiles(nq,yq,prob);
-
+        mass->GetQuantiles(nq,dptq,prob);
+	//	cout << "mass bin "<<i << " diphopt  " << dptq[i]  << endl;
+		}
         //show the original histogram in the top pad
-        TCanvas *cq = new TCanvas("cq","demo quantiles",10,10,700,900);
+       
+	   	TCanvas *cq = new TCanvas("cq","mass quantiles",10,10,700,900);
         cq->Divide(1,2);
         cq->cd(1);
+		cq->SetLogy();
+		cq->Update();
         mass->Draw();
 
         // show the quantiles in the bottom pad
         cq->cd(2);
         gPad->SetGrid();
-        TGraph *gr = new TGraph(nq,prob,yq);
+        TGraph *gr = new TGraph(nq,prob,dptq);
         gr->SetMarkerStyle(21);
         gr->Draw("alp");
-     }
-
+		cq->SaveAs("../plots/massquantiles.root");
+		cq->SaveAs("../plots/massquantiles.png");
+    
+	   	
+}
 
 
 //get the RooDataSet
@@ -254,7 +261,6 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
 
   float v_rooisopv1;
   float v_rooisopv2;
-
   float v_rooisowv1;
   float v_rooisowv2;
   float v_roovar1;
@@ -266,6 +272,7 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
   float v_roosieie2;
   float v_rooeta2;
   float v_roodiphopt;
+  float v_roodiphomass;
   float v_roorho;
   float v_roosigma;
   float v_roonvtx;
@@ -273,7 +280,6 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
 
   TBranch *b_roovar1;
   TBranch *b_roovar2;
-
   TBranch *b_rooisopv1;
   TBranch *b_rooisopv2;
   TBranch *b_rooisowv1;
@@ -285,15 +291,16 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
   TBranch *b_roosieie2;
   TBranch *b_rooeta2;
   TBranch *b_roodiphopt;
+  TBranch *b_roodiphomass;
   TBranch *b_roorho;
   TBranch *b_roosigma;
   TBranch *b_roonvtx;
   TBranch *b_rooweight;
 
-  const int nvars = 17;
-  float* ptrs[nvars]={&v_roovar1,&v_roovar2,&v_rooisopv1,&v_rooisopv2,&v_rooisowv1,&v_rooisowv2,&v_roopt1,&v_roosieie1,&v_rooeta1,&v_roopt2,&v_roosieie2,&v_rooeta2,&v_roodiphopt,&v_roorho,&v_roosigma,&v_roonvtx,&v_rooweight};
-  TBranch** branches[nvars]={&b_roovar1,&b_roovar2,&b_rooisopv1,&b_rooisopv2,&b_rooisowv1,&b_rooisowv2,&b_roopt1,&b_roosieie1,&b_rooeta1,&b_roopt2,&b_roosieie2,&b_rooeta2,&b_roodiphopt,&b_roorho,&b_roosigma,&b_roonvtx,&b_rooweight};
-  RooRealVar* rooptrs[nvars]={roovar1,roovar2,rooisopv1,rooisopv2,rooisowv1,rooisowv2,roopt1,roosieie1,rooeta1,roopt2,roosieie2,rooeta2,roodiphopt,roorho,roosigma,roonvtx,rooweight};
+  const int nvars = 18;
+  float* ptrs[nvars]={&v_roovar1,&v_roovar2,&v_rooisopv1,&v_rooisopv2,&v_rooisowv1,&v_rooisowv2,&v_roopt1,&v_roosieie1,&v_rooeta1,&v_roopt2,&v_roosieie2,&v_rooeta2,&v_roodiphopt,&v_roodiphomass,&v_roorho,&v_roosigma,&v_roonvtx,&v_rooweight};
+  TBranch** branches[nvars]={&b_roovar1,&b_roovar2,&b_rooisopv1,&b_rooisopv2,&b_rooisowv1,&b_rooisowv2,&b_roopt1,&b_roosieie1,&b_rooeta1,&b_roopt2,&b_roosieie2,&b_rooeta2,&b_roodiphopt,&b_roodiphomass,&b_roorho,&b_roosigma,&b_roonvtx,&b_rooweight};
+  RooRealVar* rooptrs[nvars]={roovar1,roovar2,rooisopv1,rooisopv2,rooisowv1,rooisowv2,roopt1,roosieie1,rooeta1,roopt2,roosieie2,rooeta2,roodiphopt,roodiphomass,roorho,roosigma,roonvtx,rooweight};
   bool status[nvars];
   RooArgSet args;
   for (int i=0; i<nvars; i++){ 
@@ -327,12 +334,10 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
 
 void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F*weight_rho2o,TH2F* weight_rhonr, TH2F* weight_rho2,TH2F*weight_sigman,TH2F*weight_sigma2o,TH2F* weight_sigmanr, TH2F* weight_sigma2,RooDataSet **dset, RooDataSet *dsetdestination, bool deleteold){
   if (!(*dset)) return;
-  (*dset)->Print();
+//  (*dset)->Print();
 
 //  TH2F *hnum = new TH2F("hnum","hnum",n_rhobins_forreweighting,rhobins_forreweighting,n_sigmabins_forreweighting,sigmabins_forreweighting);
 //  TH2F *hden = new TH2F("hden","hden",n_rhobins_forreweighting,rhobins_forreweighting,n_sigmabins_forreweighting,sigmabins_forreweighting);
- // TH2F *hnum = new TH2F("hnum","hnum",60,0,60,15,0,15);
- // TH2F *hden = new TH2F("hden","hden",60,0,60,15,0,15);
   TH2F *hnum = new TH2F("hnum","hnum",100,0,100,20,0,20);
   TH2F *hden = new TH2F("hden","hden",100,0,100,20,0,20);
   hnum->Sumw2();
@@ -344,9 +349,7 @@ void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F
     hnum->Fill(fabs(dsetdestination->get(i)->getRealValue("roorho")),fabs(dsetdestination->get(i)->getRealValue("roosigma")),dsetdestination->store()->weight(i));
   }
 
-
   hnum->Scale(1.0/hnum->Integral());
-  //TH2F *h_data = hnum;
   hden->Scale(1.0/hden->Integral());
 //data/MC
   hnum->Divide(hden);
@@ -360,37 +363,28 @@ void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F
     float rho = args.getRealValue("roorho");
     float sigma = args.getRealValue("roosigma");
     float neww = oldw*h->GetBinContent(h->FindBin(rho,sigma));
-   //     std::cout << rho << " " << sigma << std::endl;
-    //    std::cout << oldw << " " << neww << std::endl;
-//    weight_rhosigma->Fill(neww);	
- //   weight_rhosigma2->Fill(rho,neww/oldw);
-   // weight_rhosigma3->Fill(sigma,neww/oldw);
-  //  weight_rhosigma3->Fill(rho,sigma);
-//weight_rhosigma2->Fill(neww, args.getRealValue("roovar1"));
     weight_rho->Fill(neww);
     weight_rhoo->Fill(oldw);
-   weight_rho2o->Fill(h->GetXaxis()->FindBin(rho),oldw);	
-   weight_rhon->Fill(h->GetXaxis()->FindBin(rho),neww);	
-if(oldw!=0)weight_rhonr->Fill(h->GetXaxis()->FindBin(rho),oldw/neww);
- else {weight_rhonr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
-if(oldw!=0)weight_rho2->Fill(rho,oldw/neww);
-   weight_sigma2o->Fill(h->GetYaxis()->FindBin(sigma),oldw);	
-   weight_sigman->Fill(h->GetYaxis()->FindBin(sigma),neww);	
-if(oldw!=0)weight_sigmanr->Fill(h->GetYaxis()->FindBin(sigma),oldw/neww);
- else {weight_sigmanr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
-if(oldw!=0)weight_sigma2->Fill(sigma,oldw/neww);
+    weight_rho2o->Fill(h->GetXaxis()->FindBin(rho),oldw);	
+    weight_rhon->Fill(h->GetXaxis()->FindBin(rho),neww);	
+    if(oldw!=0)weight_rhonr->Fill(h->GetXaxis()->FindBin(rho),oldw/neww);
+    else {weight_rhonr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
+    if(oldw!=0)weight_rho2->Fill(rho,oldw/neww);
+    weight_sigma2o->Fill(h->GetYaxis()->FindBin(sigma),oldw);	
+    weight_sigman->Fill(h->GetYaxis()->FindBin(sigma),neww);	
+    if(oldw!=0)weight_sigmanr->Fill(h->GetYaxis()->FindBin(sigma),oldw/neww);
+    else {weight_sigmanr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
+    if(oldw!=0)weight_sigma2->Fill(sigma,oldw/neww);
+	
 	newdset->add(args,neww);
   }
   newdset->SetName((*dset)->GetName());
   newdset->SetTitle((*dset)->GetTitle());
-
-//  weight_rhosigma3->Scale(1.0/weight_rhosigma3->Integral());
-  //weight_rhosigma3->Divide(h_data);
   delete hnum; delete hden;
   RooDataSet *old_dset = *dset;
   *dset=newdset;
   std::cout << "RhoSigma2D rew: norm from " << old_dset->sumEntries() << " to " << newdset->sumEntries() << std::endl;
-  (*dset)->Print();
+ // (*dset)->Print();
   if (deleteold) delete old_dset;
 };
 
@@ -404,8 +398,6 @@ void reweight_pt_1d(TH1F* weight_pt, TH1F* weight_pto,TH2F*weight_ptn,TH2F*weigh
   hnum->Sumw2();
   hden->Sumw2();
 
-  TH1F *h_data = new TH1F("h_data","h_data",n_ptbins_forreweighting,ptbins_forreweighting);
-  h_data->Sumw2();
   const char* ptname=Form("roopt%d",numvar);
 // RooAbsData->get*() Load a given row of data
  //getRealValue Get value of a RooAbsReal stored in set with given name. If none is found, value of defVal is returned.
@@ -416,19 +408,11 @@ void reweight_pt_1d(TH1F* weight_pt, TH1F* weight_pto,TH2F*weight_ptn,TH2F*weigh
     hnum->Fill(fabs(dsetdestination->get(i)->getRealValue(ptname)),dsetdestination->store()->weight(i));
   }
   
- // for (int i=0; i<dsetdestination->numEntries(); i++){
-  //  h_data->Fill(fabs(dsetdestination->get(i)->getRealValue(ptname)));
- // }
-//MQ
  //normalize to one 
   hnum->Scale(1.0/hnum->Integral());
   hden->Scale(1.0/hden->Integral());
   hnum->Divide(hden);
   TH1F *h = hnum;
-  for (int i=0; i<dsetdestination->numEntries(); i++){
-   h_data->Fill(fabs(dsetdestination->get(i)->getRealValue(ptname)));
-  }
-
 
   RooDataSet *newdset = new RooDataSet(**dset,Form("%s_ptrew",(*dset)->GetName()));
   newdset->reset();
@@ -439,44 +423,30 @@ void reweight_pt_1d(TH1F* weight_pt, TH1F* weight_pto,TH2F*weight_ptn,TH2F*weigh
     float neww = oldw*h->GetBinContent(h->FindBin(fabs(pt)));
     weight_pt->Fill(neww);	
 	weight_pto->Fill(oldw);
- //   weight_ptn->Fill((h->GetBinContent(h->FindBin(fabs(pt)))),neww);	
     weight_pt2o->Fill(h->FindBin(fabs(pt)),oldw);
     weight_ptn->Fill(h->FindBin(fabs(pt)),neww);	
-//    weight_ptnr->Fill(h->FindBin(fabs(pt)),oldw/neww);	
-   if(oldw!=0 && neww!=0)weight_ptnr->Fill(h->FindBin(fabs(pt)),oldw/neww);
-  else {weight_ptnr->Fill(-10,1);}
-   // weight_pt2->Fill(pt,neww/oldw);
-   if(oldw!=0 && neww!=0)weight_pt2->Fill(pt,oldw/neww);
-  else {weight_pt2->Fill(-10,1);}
-//weight_pt2->Fill(neww, args.getRealValue("roovar1"));
-//    std::cout << oldw << " " << neww << std::endl;
-  // cout << __LINE__ << endl; 
+    if(oldw!=0 && neww!=0)weight_ptnr->Fill(h->FindBin(fabs(pt)),oldw/neww);
+    else {weight_ptnr->Fill(-10,1);}
+    if(oldw!=0 && neww!=0)weight_pt2->Fill(pt,oldw/neww);
+    else {weight_pt2->Fill(-10,1);}
+	
     newdset->add(args,neww);
   }
 
-// for (int i=0; i<n_ptbins_forreweighting; i++){
-// h_data->Fill(h->GetBinContent(i),);
-// }
-
-
   newdset->SetName((*dset)->GetName());
   newdset->SetTitle((*dset)->GetTitle());
-  //weight_pt->Scale(1.0/weight_pt->Integral());
-// weight_pt->Divide(h_data);
   delete hnum; delete hden;
 
   RooDataSet *old_dset = *dset;
   *dset=newdset;
   std::cout << "Pt 1d rew: norm from " << old_dset->sumEntries() << " to " << newdset->sumEntries() << std::endl;
-
   delete old_dset;
-
 };
 
 void reweight_diphotonpt_1d(TH1F*weight_diphopt,TH1F*weight_diphopto,TH2F*weight_diphoptn,TH2F*weight_diphopt2o,TH2F*weight_diphoptnr, TH2F* weight_diphopt2,RooDataSet **dset, RooDataSet *dsetdestination){
 
   if (!(*dset)) return;
-if (!(dsetdestination)) return;
+  if (!(dsetdestination)) return;
 ///numerator and denominator
   TH1F *hnum = new TH1F("hnum","hnum",n_diphoptbins_forreweighting,diphoptbins_forreweighting);
   TH1F *hden = new TH1F("hden","hden",n_diphoptbins_forreweighting,diphoptbins_forreweighting);
@@ -493,10 +463,8 @@ if (!(dsetdestination)) return;
   for (int i=0; i<dsetdestination->numEntries(); i++){
     hnum->Fill(fabs(dsetdestination->get(i)->getRealValue("roodiphopt")),dsetdestination->store()->weight(i));
   }
-//MQ
  //normalize to one 
   hnum->Scale(1.0/hnum->Integral());
-  //TH1F *h_data = hnum;
   hden->Scale(1.0/hden->Integral());
   hnum->Divide(hden);
   TH1F *h = hnum;
@@ -509,27 +477,19 @@ if (!(dsetdestination)) return;
     float diphopt = fabs((*dset)->get(i)->getRealValue("roodiphopt"));
     float neww = oldw*h->GetBinContent(h->FindBin(fabs(diphopt)));
     newdset->add(args,neww);
-// cout << __LINE__ << endl; 
     weight_diphopt->Fill(neww);
     weight_diphopto->Fill(oldw);
-    //weight_diphopt->Fill(neww);	
-   // weight_diphopt->Fill(diphopt);	
-  //  weight_diphoptnr->Fill((h->GetBinContent(h->FindBin(fabs(diphopt)))),neww/oldw);	
- //   weight_diphoptn->Fill((h->GetBinContent(h->FindBin(fabs(diphopt)))),neww);	
-   weight_diphopt2o->Fill((h->FindBin(fabs(diphopt))),oldw);	
-   weight_diphoptn->Fill((h->FindBin(fabs(diphopt))),neww);	
- ///   weight_diphopt2->Fill(diphopt, neww/oldw);
-if(oldw!=0)weight_diphoptnr->Fill(h->FindBin(fabs(diphopt)),oldw/neww);
- else {weight_diphoptnr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
-if(oldw!=0)weight_diphopt2->Fill(diphopt,oldw/neww);
- else {weight_diphopt2->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
-  // weight_diphopt2->Fill(neww, args.getRealValue("roovar1"));
-  }
+    weight_diphopt2o->Fill((h->FindBin(fabs(diphopt))),oldw);	
+    weight_diphoptn->Fill((h->FindBin(fabs(diphopt))),neww);	
+    if(oldw!=0)weight_diphoptnr->Fill(h->FindBin(fabs(diphopt)),oldw/neww);
+    else {weight_diphoptnr->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
+    if(oldw!=0)weight_diphopt2->Fill(diphopt,oldw/neww);
+    else {weight_diphopt2->Fill(-10,1);}//cout << "dipho weight old 0" << endl;}
+  
+	}
 
   newdset->SetName((*dset)->GetName());
   newdset->SetTitle((*dset)->GetTitle());
- // weight_diphopt->Scale(1.0/weight_diphopt->Integral());
- // weight_diphopt->Divide(h_data);
   delete hnum; delete hden;
  
   RooDataSet *old_dset = *dset;
@@ -595,12 +555,9 @@ void reweight_eta_1d(TH1F* weight_eta,TH1F* weight_etao,TH2F*weight_etan,TH2F* w
    // weight_pt2->Fill(pt,neww/oldw);
    if(oldw!=0 && neww!=0)weight_eta2->Fill(fabs(eta),oldw/neww);
   else {weight_eta2->Fill(-10,1);}
-  	newdset->add(args,neww);
   
- //   weight_eta->Fill(neww);	
-  //  weight_eta->Fill(eta);	
-   // weight_eta2->Fill(eta,neww/oldw);
-    //weight_eta2->Fill(neww, args.getRealValue("roovar1"));	
+  newdset->add(args,neww);
+  
   }
 
 
@@ -667,7 +624,7 @@ Double_t meanh2=EB_truth->Integral(0,EB_truth->GetNbinsX());
 //      Double_t err_ratio= ratio*ratio*pow(((err1/meanh1)*(err1/meanh1)+(err2/meanh2)*(err2/meanh2)),0.5);
      // Double_t ratio_error=
       cout << "data " << EB_data->GetNbinsX() <<" truth " << EB_truth->GetNbinsX() << endl;
- //     cout << "meanh1 " << meanh1 << " +/- " << err1 << "meanh2 " << meanh2 << " +/- " <<err2<<"ratio " << ratio << "+/-"<< err_ratio << endl;
+//     cout << "meanh1 " << meanh1 << " +/- " << err1 << "meanh2 " << meanh2 << " +/- " <<err2<<"ratio " << ratio << "+/-"<< err_ratio << endl;
   cout << " meanh1 " << meanh1  << " meanh2 " << meanh2<<" ratio " << ratio  << endl;  
     EB_data->Draw();
       EB_truth->Draw("SAME");
@@ -717,8 +674,8 @@ const char * ratio_out= Form("ratio of truth MC to data MC: %f",ratio);
 
 }
 /////////////////////////////////////////////////////////////////////
-int do1dfit(){
-//1d fit following dolightcomp from Marcos code
+int prep_dataset(){
+//1d cfit following dolightcomp from Marcos code
  //taking isolation variable
 	  gStyle->SetOptStat(111111);
   Float_t leftrange=0. ;
@@ -728,15 +685,13 @@ int do1dfit(){
   roovar2 = new RooRealVar("roovar2","roovar2",leftrange,rightrange);
   roovar1->setRange(leftrange,rightrange);
   roovar2->setRange(leftrange,rightrange);
-   RooBinning tbins (0,9); 
-   tbins.addUniform(90,0,9) ;
-//   tbins.addUniform(5,0,1) ;
-//   tbins.addUniform(30,1,3);
-//     tbins.addUniform(15,3,9) ;
-//     tbins.addUniform(10,0.,1.) ;
-  //   tbins.addUniform(20,1.,3.);
-   //    tbins.addUniform(10,3.,6.) ;
-   //    tbins.addUniform(3,6.,9.) ;
+//   tbins.addUniform(90,0,9) ;
+     tbins.addUniform(5,0.,1.) ;
+     tbins.addUniform(8,1.,5.) ;
+     tbins.addUniform(4,5.,9.) ;
+  //   tbins.addUniform(5,2.,4.);
+   //    tbins.addUniform(4,4.,6.) ;
+    //   tbins.addUniform(3,6.,9.) ;
          roovar1->setBinning(tbins);
   roovar1->SetTitle("Iso_{1}");
   roovar2->SetTitle("Iso_{2}"); 
@@ -793,6 +748,7 @@ int do1dfit(){
   //roodiphopt = new RooRealVar("roodiphopt","roodiphopt",100.);
   //roorho = new RooRealVar("roorho","roorho",20.);
   //roosigma = new RooRealVar("roosigma","roosigma",2.);
+  roodiphomass = new RooRealVar("roodiphomass","roodiphomass",0.,4000.);
   roorho = new RooRealVar("roorho","roorho",0.,100.);
   roosigma = new RooRealVar("roosigma","roosigma",0.,20.);
   roonvtx = new RooRealVar("roonvtx","roonvtx",20.);
@@ -810,67 +766,153 @@ int do1dfit(){
   assert (roosieie2);
   assert (rooeta2);
   assert (roodiphopt);
+  assert (roodiphomass);
   assert (roorho);
   assert (roosigma);
   assert (roonvtx);
   assert (rooweight);
   TH1::SetDefaultSumw2(kTRUE);
   //Axis 1 and 2 randomly swapped
-TFile* fdata=NULL; TFile* frcone=NULL; TFile * fsideband=NULL; //TFile* testfile=NULL;
- 	 //fdata_std = new TFile("../forroofit/fullmc_fulletarange/mc2dstd_fulletarange.root","read"); 
- 	 fdata = new TFile("../forroofit/Feb13/data.root","read"); 
- 	 get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
+  TFile* fdata=NULL; TFile* frcone=NULL; TFile * fsideband=NULL; TFile* testfile=NULL;
+  fdata = new TFile("../forroofit/Feb27/data.root","read"); 
+  get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
 //both leading and subleading photon 
  	 //rcone = new TFile("../forroofit/fullmc_fulletarange/sig_fulletarange.root","read"); 
  //	frcone = new TFile("../forroofit/Feb13/rcone.root","read"); 
-   	frcone = new TFile("../forroofit/Feb13/sig.root","read"); 
-	 get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
+  frcone = new TFile("../forroofit/Feb27/rcone.root","read"); 	
+  get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
 	 //sideband= new TFile("../forroofit/fullmc_fulletarange/bkg_fulletarange.root","read");
 //	 fsideband= new TFile("../forroofit/Feb13/sideband.root","read");
-	 fsideband= new TFile("../forroofit/Feb13/bkg.root","read");
-	 get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
+	fsideband= new TFile("../forroofit/Feb27/sideband.root","read");
+  get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
+
+testfile= new TFile("../forroofit/Feb27/bkg.root","read");
+get_roodset_from_ttree(testfile,"for_roofit",dataset_test1);
+ 
+assert(fdata); assert(frcone);  assert(fsideband);
 
 
-  assert(fdata); assert(frcone);  assert(fsideband);
+
+
 //define mass bins
   TH1F* diphomass_data=(TH1F*)fdata->Get("h_diphomass") ;
   assert(diphomass_data);
-  quantiles(diphomass_data);
-//mass->Scale(1.0/h_diphomass->Integral())
-//get_roodset_from_ttree(testfile,"for_roofit",dataset_test);
+  quantiles(diphomass_data); 
+  
 //cout << "before cuts " << endl;
 //  TString cut_string= Form("roovar1<%f",rightrange-1e-5);
-    // TString cut_string= Form("roovar1<%f && rooeta1<1.5 && rooeta2 < 1.5",rightrange-1e-5);
+  // TString cut_string= Form("roovar1<%f && rooeta1<1.5 && rooeta2 < 1.5",rightrange-1e-5);
+   TString cut_string= Form("roovar1<%f && (rooeta1>1.5 || rooeta2 > 1.5)",rightrange-1e-5);
   // TString cut_string= Form("roovar1<%f && roowisov1<%f && rooisopv1<%f",rightrange-1e-5,rightrange-1e-5,rightrange-1e-5);
   // TString cut_string= Form("roovar1<%f && roowisov1<%f && rooisopv1<%f",rightrange-1e-5,rightrange-1e-5,rightrange-1e-5);
-   TString cut_string= Form("roovar1<%f && rooeta1<1.5 && rooeta2 < 1.5",rightrange-1e-5);
+
+//  TString cut_string= Form("roovar1<%f ",rightrange-1e-5);
   if (dataset_data) dset_data = (RooDataSet*)(dataset_data->reduce(Name("dset_data"),Cut(cut_string)));
   if (dataset_rcone) dset_rcone = (RooDataSet*)(dataset_rcone->reduce(Name("dset_rcone"),Cut(cut_string)));
   if (dataset_sideband) dset_sideb = (RooDataSet*)(dataset_sideband->reduce(Name("dset_sideb"),Cut(cut_string)));
+  if (dataset_test1) dataset_test = (RooDataSet*)(dataset_test1->reduce(Name("dataset_test"),Cut(cut_string)));
 ////create subset of dataset e.g. for 1d signal template, here leading photon 
- 
- 
- 
-  //RooDataSet *dset_data_axis1 = (RooDataSet*)(dset_data->reduce(Name("dset_data_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*rooisowv1,*roopt1,*roosieie1,*roodiphopt,*rooeta1,*roorho,*roosigma,*roonvtx))));
- // RooDataSet *dset_rcone_axis1 = (RooDataSet*)(dset_rcone->reduce(Name("dset_rcone_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1, *rooisowv1,*roopt1,*roosieie1,*rooeta1,*roodiphopt,*roorho,*roosigma,*roonvtx))));
- // RooDataSet *dset_sideb_axis1 = (RooDataSet*)(dset_sideb->reduce(Name("dset_sideb_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*rooisowv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roosigma,*roonvtx))))
-  RooDataSet *dset_data_axis1 = (RooDataSet*)(dset_data->reduce(Name("dset_data_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*rooisowv1,*roopt1,*roosieie1,*roodiphopt,*rooeta1,*roorho,*roosigma))));
-  RooDataSet *dset_rcone_axis1 = (RooDataSet*)(dset_rcone->reduce(Name("dset_rcone_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1, *rooisowv1,*roopt1,*roosieie1,*rooeta1,*roodiphopt,*roorho,*roosigma))));
-  RooDataSet *dset_sideb_axis1 = (RooDataSet*)(dset_sideb->reduce(Name("dset_sideb_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*rooisowv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roosigma))));
-  assert(dset_data_axis1);assert(dset_rcone_axis1);assert(dset_sideb_axis1); 
+  RooDataSet *dset_data_allm_axis1 = (RooDataSet*)(dset_data->reduce(Name("dset_data_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*roodiphopt,*roodiphomass,*rooeta1,*roorho,*roosigma))));
+  RooDataSet *  dset_rcone_allm_axis1 = (RooDataSet*)(dset_rcone->reduce(Name("dset_rcone_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roodiphopt,*roodiphomass,*roorho,*roosigma))));
+  RooDataSet *  dset_sideb_allm_axis1 = (RooDataSet*)(dset_sideb->reduce(Name("dset_sideb_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
+  assert(dset_data_allm_axis1);assert(dset_rcone_allm_axis1);assert(dset_sideb_allm_axis1); 
 
-  cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/ dset_data_axis1->sumEntries()  << endl;
-  //reweight always reweight to data in signal region
-  reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_sideb_axis1,dset_data_axis1); 
-  reweight_rhosigma(w_rho,w_rhoo,w_rhon,w_rho2o,w_rhonr,w_rho2,w_sigman,w_sigma2o,w_sigmanr,w_sigma2,&dset_sideb_axis1,dset_data_axis1); 
-  reweight_eta_1d(w_etar,w_etaro,w_etarn,w_etar2o,w_etarnr,w_etar2,&dset_rcone_axis1,dset_data_axis1,1);
-  reweight_eta_1d(w_eta,w_etao,w_etan,w_eta2o,w_etanr,w_eta2,&dset_sideb_axis1,dset_data_axis1,1);
-  reweight_pt_1d(w_pt,w_pto,w_ptn,w_pt2o,w_ptnr,w_pt2,&dset_sideb_axis1,dset_data_axis1,1);
-  reweight_pt_1d(w_ptr,w_ptro,w_ptrn,w_ptr2o,w_ptrnr,w_ptr2,&dset_rcone_axis1,dset_data_axis1,1);
-  reweight_diphotonpt_1d(w_diphopt,w_diphopto,w_diphoptn,w_diphopt2o,w_diphoptnr,w_diphopt2,&dset_sideb_axis1,dset_data_axis1); 
-  reweight_diphotonpt_1d(w_diphopt,w_diphopto,w_diphoptn,w_diphopt2o,w_diphoptnr,w_diphopt2,&dset_sideb_axis1,dset_data_axis1); 
   
 
+ //compare bkg and sideband
+ 
+  RooDataSet *  dset_test = (RooDataSet*)(dataset_test->reduce(Name("dset_test"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
+/*
+  RooDataHist *test_side = new RooDataHist("test_side","test_side",RooArgSet(*roovar1));
+  test_side->add(*dset_sideb_allm_axis1);
+  RooDataHist *test_bkg = new RooDataHist("test_bkg","test_bkg",RooArgSet(*roovar1));
+  test_bkg->add(*dset_test);
+  RooHistPdf *test_sidepdf = new RooHistPdf("test_sidepdf","test_sidepdf",RooArgList(*roovar1),*test_side);
+  RooHistPdf *test_bkgpdf = new RooHistPdf("test_bkgpdf","test_bkgpdf",RooArgList(*roovar1),*test_bkg);
+  TCanvas *c3=new TCanvas("c3","isolation comparison");
+  c3->cd();
+  c3->SetLogy();
+  RooPlot *testp = roovar1->frame(Title("sideband bkg comparison before reweighting"));
+  test_sidepdf->plotOn(testp,LineStyle(kDashed),LineColor(kRed),Name("sideband"));
+  test_bkgpdf->plotOn(testp,LineStyle(kDashed),LineColor(kBlack),Name("bkg"));
+  testp->Draw(); 
+ c3->SaveAs("../plots/sideband_bkg_comparison_noreweight.root") ;
+ c3->SaveAs("../plots/sideband_bkg_comparison_noreweight.png") ;
+ */
+  // ratioplot(dset_data_axis1, dset_rcone_axis1,kTRUE);
+//
+//
+ //
+/*
+ for(int i=0; i< nq;i++){
+	TString cut_s;
+	RooDataSet *dset_rcone_temp=NULL;
+	dset_rcone_temp=new RooDataSet(*dset_rcone_allm_axis1,Form("dset_rcone%u_axis1",i));
+	RooDataSet *dset_sideb_temp=NULL;
+	dset_sideb_temp=new RooDataSet(*dset_sideb_allm_axis1,Form("dset_sideb%u_axis1",i));
+    RooDataSet *dset_temp = NULL;
+    cut_s= Form("roodiphomass>%f && roodiphomass<%f",dptq[i-1],dptq[i]);
+    cout << cut_s << endl;
+
+  
+  	dset_temp = (RooDataSet*)(dset_data_allm_axis1->reduce(Name("dset_temp"),Cut(cut_s)));
+    do1dfit(dset_temp,dset_rcone_temp,dset_sideb_temp,dset_test,i);
+	dset_temp->Delete();
+	dset_rcone_temp->Delete();
+	dset_sideb_temp->Delete();
+	cut_s.Clear();
+ }
+*/
+   int i= 100;
+   do1dfit(dset_data_allm_axis1,dset_rcone_allm_axis1,dset_sideb_allm_axis1,dset_test,i);
+  return 0;
+  
+}
+
+
+int do1dfit(RooDataSet *dset_data_axis1,RooDataSet *dset_rcone_axis1,RooDataSet *dset_sideb_axis1,RooDataSet*dset_testbkg,int im){
+//int do1dfit(RooDataSet *dset_data_axis1,RooDataSet *dset_rcone_axis1,RooDataSet *dset_sideb_axis1,int im){
+//reweighting
+	 cout << "massbin " << im << endl;
+	dset_data_axis1->Print();
+	dset_rcone_axis1->Print();
+	dset_sideb_axis1->Print();
+//	if(dset_testbkg) dset_testbkg->Print();
+  // 	cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/ dset_data_axis1->sumEntries()  << endl;
+
+  //reweight always reweight to data in signal region
+   reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_rcone_axis1,dset_data_axis1); 
+    reweight_rhosigma(w_rho,w_rhoo,w_rhon,w_rho2o,w_rhonr,w_rho2,w_sigman,w_sigma2o,w_sigmanr,w_sigma2,&dset_sideb_axis1,dset_data_axis1); 
+    reweight_eta_1d(w_etar,w_etaro,w_etarn,w_etar2o,w_etarnr,w_etar2,&dset_rcone_axis1,dset_data_axis1,1);
+    reweight_eta_1d(w_eta,w_etao,w_etan,w_eta2o,w_etanr,w_eta2,&dset_sideb_axis1,dset_data_axis1,1);
+    reweight_pt_1d(w_pt,w_pto,w_ptn,w_pt2o,w_ptnr,w_pt2,&dset_sideb_axis1,dset_data_axis1,1); 
+  // reweight_pt_1d(w_ptr,w_ptro,w_ptrn,w_ptr2o,w_ptrnr,w_ptr2,&dset_rcone_axis1,dset_data_axis1,1);
+    reweight_diphotonpt_1d(w_diphopt,w_diphopto,w_diphoptn,w_diphopt2o,w_diphoptnr,w_diphopt2,&dset_sideb_axis1,dset_data_axis1); 
+//    reweight_diphotonpt_1d(w_diphoptr,w_diphoptro,w_diphoptrn,w_diphoptr2o,w_diphoptrnr,w_diphoptr2,&dset_rcone_axis1,dset_data_axis1); 
+//compare bkg sideband after reweighting 
+ /* 
+  	reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_testbkg,dset_data_axis1); 
+    reweight_eta_1d(w_etar,w_etaro,w_etarn,w_etar2o,w_etarnr,w_etar2,&dset_testbkg,dset_data_axis1,1);
+    reweight_pt_1d(w_ptr,w_ptro,w_ptrn,w_ptr2o,w_ptrnr,w_ptr2,&dset_testbkg,dset_data_axis1,1);
+    reweight_diphotonpt_1d(w_diphoptr,w_diphoptro,w_diphoptrn,w_diphoptr2o,w_diphoptrnr,w_diphoptr2,&dset_testbkg,dset_data_axis1); 
+  RooDataHist *test_side2 = new RooDataHist("test_side2","test_side2",RooArgSet(*roovar1));
+  test_side2->add(*dset_sideb_axis1);
+  RooDataHist *test_bkg2 = new RooDataHist("test_bkg2","test_bkg2",RooArgSet(*roovar1));
+  test_bkg2->add(*dset_testbkg);
+  RooHistPdf *test_sidepdf2 = new RooHistPdf("test_sidepdf2","test_sidepdf2",RooArgList(*roovar1),*test_side2);
+  RooHistPdf *test_bkgpdf2 = new RooHistPdf("test_bkgpdf2","test_bkgpdf2",RooArgList(*roovar1),*test_bkg2);
+  TCanvas *c4=new TCanvas("c4","isolation comparison after reweighting");
+  c4->cd();
+  c4->SetLogy();
+  RooPlot *testp2 = roovar1->frame(Title("sideband bkg comparison after reweighting"));
+  test_sidepdf2->plotOn(testp2,LineStyle(kDashed),LineColor(kRed),Name("sideband"));
+  test_bkgpdf2->plotOn(testp2,LineStyle(kDashed),LineColor(kBlack),Name("bkg"));
+  testp2->Draw(); 
+ c4->SaveAs("../plots/sideband_bkg_comparison_reweight.root") ;
+c4->SaveAs("../plots/sideband_bkg_comparison_reweight.png") ;
+ */
+
+/*	
 w_pt->SetTitle("new weights ");
 w_ptn->SetTitle("new weights vs pt bins");
 w_pto->SetTitle("old weights");
@@ -915,56 +957,34 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
   c_rhoreweights->Divide(3,2);  c_rhoreweights->cd(1);  w_rhon->Draw("colz");
   c_rhoreweights->cd(2);    w_rho2o->Draw("colz");  c_rhoreweights->cd(3);    w_rhonr->Draw("colz");
   c_rhoreweights->cd(4);  w_rho2->Draw("colz");  c_rhoreweights->cd(5);
-  w_rho->Draw();c_rhoreweights->cd(6);    w_rhoo->Draw(); c_rhoreweights->SaveAs("../plots/c_rhoreweights.root");
+  w_rho->Draw();c_rhoreweights->cd(6);    w_rhoo->Draw();
+  c_rhoreweights->SaveAs("../plots/c_rhoreweights.root");
+  c_rhoreweights->SaveAs("../plots/c_rhoreweights.png");
   TCanvas * c_sigmareweights=new TCanvas("c_sigmareweights","c_sigmareweights");
   c_sigmareweights->Divide(2,2);  c_sigmareweights->cd(1);  w_sigman->Draw("colz");  c_sigmareweights->cd(2); 
    w_sigma2o->Draw("colz");  c_sigmareweights->cd(3);    w_sigmanr->Draw("colz");  c_sigmareweights->cd(4);
-  w_sigma2->Draw("colz");   c_sigmareweights->SaveAs("../plots/c_sigmareweights.root");
+  w_sigma2->Draw("colz"); 
+  c_sigmareweights->SaveAs("../plots/c_sigmareweights.root");
+  c_sigmareweights->SaveAs("../plots/c_sigmareweights.png");
   
   TCanvas * c_etareweights=new TCanvas("c_etareweights","c_etareweights");
   c_etareweights->Divide(3,2);  c_etareweights->cd(1);  w_etan->Draw("colz");
   c_etareweights->cd(2);    w_eta2o->Draw("colz");  c_etareweights->cd(3);    w_etanr->Draw("colz");
   c_etareweights->cd(4);  w_eta2->Draw("colz");  c_etareweights->cd(5);
-  w_eta->Draw();c_etareweights->cd(6);   w_etao->Draw();  c_etareweights->SaveAs("../plots/c_etareweights.root");
- 
- /*
-  cout << "after reweighting" << endl;
-	  cout << "sig " << dset_rcone_axis1->sumEntries() << endl;
+  w_eta->Draw();c_etareweights->cd(6);   w_etao->Draw(); 
+  c_etareweights->SaveAs("../plots/c_etareweights.root");
+  c_etareweights->SaveAs("../plots/c_etareweights.png");
+*/
+/*
+  cout << "after reweighting" << endl; 
+  cout << "sig " << dset_rcone_axis1->sumEntries() << endl;
   cout << "bkg " << dset_sideb_axis1->sumEntries() << endl;
   cout << "data " << dset_data_axis1->sumEntries() << endl;
   cout << "signal+ fakes " << dset_rcone_axis1->sumEntries()+ dset_sideb_axis1->sumEntries()<< endl;
   cout << "one? " << (dset_rcone_axis1->sumEntries()+ dset_sideb_axis1->sumEntries())/dset_data_axis1->sumEntries()<< endl;
   cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/dset_data_axis1->sumEntries()  << endl;
 */
-
-// ratioplot(dset_data_axis1, dset_rcone_axis1,kTRUE);
-  //fitting
- cout << "fitting starts" << endl;
-//first step determine single-photon purities on Iso1 and Iso2 axes
-//for integral 0-90 GeV, fit should not depend on initial values!  
-//give initial values for purity fraction -j1 overall purity for leg 1 
-  RooRealVar *j1=NULL;RooFormulaVar *fsig1=NULL;
-  j1 = new RooRealVar("j1","j1",0.3,0,1);
-  fsig1 = new RooFormulaVar("fsig1","fsig1","j1",RooArgList(*j1));
-  
-  //produces binned RooDataHist also when RooRealVar input and weights are unbinned
-  RooArgSet var;
-  if(dohggv){var.add(*roovar1);}
-  else if(dovzero) {var.add(*rooisopv1);}
-  else if(dowv) {var.add(*rooisowv1);}
-  RooDataHist *drconehist_axis1 = new RooDataHist("drconehist_axis1","drconehist_axis1",var);
-  drconehist_axis1->add(*dset_rcone_axis1);
-  drconehist_axis1->Print("V");
-  RooDataHist *dsidebhist_axis1 = new RooDataHist("dsidebhist_axis1","dsidebhist_axis1",var);
-  dsidebhist_axis1->add(*dset_sideb_axis1);
-  dsidebhist_axis1->Print("V"); 
-  RooHistPdf *drconepdf_axis1 = new RooHistPdf("drconepdf_axis1","drconepdf_axis1",var,*drconehist_axis1);
-  RooHistPdf *dsidebpdf_axis1 = new RooHistPdf("dsidebpdf_axis1","dsidebpdf_axis1",var,*dsidebhist_axis1);
-  //normalizes histograms over all observables
-  //RooHistPdf *drconepdf_axis1 = new RooHistPdf("drconepdf_axis1","drconepdf_axis1",RooArgList(*roovar1),*drconehist_axis1);
-  //RooHistPdf *dsidebpdf_axis1 = new RooHistPdf("dsidebpdf_axis1","dsidebpdf_axis1",RooArgList(*roovar1),*dsidebhist_axis1);
-  
-  /*
+/*
  //debugging reweighting 
   RooDataHist *test_dpt = new RooDataHist("test_dpt","test_dpt",RooArgSet(*roodiphopt));
   test_dpt->add(*dset_data_axis1);
@@ -985,7 +1005,39 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
   drconehist_axis1->plotOn(frame1bla2,LineStyle(kDashed),MarkerColor(kRed),Name("sig"));
   dsidebhist_axis1->plotOn(frame1bla2,LineStyle(kDashed),MarkerColor(kBlack),Name("bkg"));
   frame1bla2->Draw();
-*/ 
+  */
+  //fitting
+ cout << "fitting starts" << endl;
+//first step determine single-photon purities on Iso1 and Iso2 axes
+//for integral 0-90 GeV, fit should not depend on initial values!  
+//give initial values for purity fraction -j1 overall purity for leg 1 
+  RooRealVar *j1=NULL;RooFormulaVar *fsig1=NULL;
+  j1 = new RooRealVar("j1","j1",0.3,0,1);
+  fsig1 = new RooFormulaVar("fsig1","fsig1","j1",RooArgList(*j1));
+  
+  //produces binned RooDataHist also when RooRealVar input and weights are unbinned
+  RooArgSet var;
+  if(dohggv){var.add(*roovar1);}
+  else if(dovzero) {var.add(*rooisopv1);}
+  else if(dowv) {var.add(*rooisowv1);}
+  RooDataHist *drconehist_axis1=NULL;
+  RooDataHist *dsidebhist_axis1=NULL;
+  RooHistPdf *drconepdf_axis1 =NULL;
+  RooHistPdf *dsidebpdf_axis1 =NULL;
+//  RooDataHist *drconehist_axis1 = new RooDataHist("drconehist_axis1","drconehist_axis1",var);
+  drconehist_axis1 = new RooDataHist("drconehist_axis1","drconehist_axis1",var);
+  drconehist_axis1->add(*dset_rcone_axis1);
+  drconehist_axis1->Print("V");
+ // RooDataHist *dsidebhist_axis1 = new RooDataHist("dsidebhist_axis1","dsidebhist_axis1",var);
+  dsidebhist_axis1 = new RooDataHist("dsidebhist_axis1","dsidebhist_axis1",var);
+  dsidebhist_axis1->add(*dset_sideb_axis1);
+  dsidebhist_axis1->Print("V"); 
+  drconepdf_axis1 = new RooHistPdf("drconepdf_axis1","drconepdf_axis1",var,*drconehist_axis1);
+  dsidebpdf_axis1 = new RooHistPdf("dsidebpdf_axis1","dsidebpdf_axis1",var,*dsidebhist_axis1);
+  //normalizes histograms over all observables
+  //RooHistPdf *drconepdf_axis1 = new RooHistPdf("drconepdf_axis1","drconepdf_axis1",RooArgList(*roovar1),*drconehist_axis1);
+  //RooHistPdf *dsidebpdf_axis1 = new RooHistPdf("dsidebpdf_axis1","dsidebpdf_axis1",RooArgList(*roovar1),*dsidebhist_axis1);
+  
 
 
  
@@ -999,7 +1051,7 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
  //hesse run by default
  // firstpass1 = model_axis1->fitTo(*test, NumCPU(8), Extended(false),SumW2Error(kTRUE),Save(kTRUE));
   firstpass1 = model_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kTRUE),Save(kTRUE));
-  TFile resFile("mctruth_nooverflow_reweight.root","RECREATE"); 
+  TFile resFile(Form("../plots/fitresult_truth_%u.root",im),"RECREATE"); 
   firstpass1->Write();
   resFile.Write();  
   resFile.Close();
@@ -1011,10 +1063,10 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
   TLegend *leg = new TLegend(0.15,0.8,0.35,0.9);
   c1->cd(1);
   TString title; 
-  title= "1d fit for hgg vertex, EBEB, reweighted";
+  title= Form("1d fit for hgg vertex, nEBEB, reweighted,%u",im);
 
   TString titlevzero; 
-  titlevzero= "1d fit for vertex[0], full eta range, reweighted";
+  titlevzero= Form("1d fit for vertex[0], full eta range, reweighted,%u",im);
   TString titlewv; 
   titlewv= "1d fit for worst isolation, full eta range, reweighted";
   //lin plot
@@ -1031,10 +1083,10 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
   model_axis1->plotOn(frame1bla,Components("dsidebpdf_axis1"),LineStyle(kDashed),LineColor(kBlack),Name("background"));
   frame1bla->Draw();
   leg->AddEntry("fit","fit","l");
-//  leg->AddEntry("signal","rcone MC","l");
-//  leg->AddEntry("background","sideband  MC","l");
-  leg->AddEntry("signal","signal MC","l");
-  leg->AddEntry("background","background  MC","l");
+  leg->AddEntry("signal","rcone MC","l");
+  leg->AddEntry("background","sideband  MC","l");
+//  leg->AddEntry("signal","signal MC","l");
+//  leg->AddEntry("background","background  MC","l");
   leg->SetFillColor(kWhite); 
   leg->Draw();
   b.DrawLatex(0.55,0.7,"PRELIMINARY");
@@ -1061,198 +1113,30 @@ w_sigmanr->SetTitle("old weights/new weights vs sigma bins");
 
   TString titleout;
 
-//  if(dohggv) titleout= "EBEB_reweight_rcone_sideband_hggv";
-  if(dohggv) titleout= "EBEB_reweight_truth_hggv";
+ // if(dohggv) titleout= Form("nnEBEB_reweight_rcone_sideb_hggvtx_%u",im);
+  if(dohggv) titleout= Form("nEBEB_reweight_rcone_hggvtx_varbinning%u",im);
   else if(dovzero) titleout= "nooverflow_reweight_fulletarange_rcone_sideband_vzero";
   else if(dowv) titleout= "nooverflow_reweight_fulletarange_rcone_sideband_wv";
   //titleout="rcone_sideb";
   const char* outfile=Form("../plots/mc_%s", titleout.Data());
   c1->SaveAs(Form("%s_lin.png",outfile));c1->SaveAs(Form("%s_lin.root",outfile));c1->SaveAs(Form("%s_lin.pdf",outfile));
   c2->SaveAs(Form("%s_log.png",outfile));c2->SaveAs(Form("%s_log.root",outfile));c2->SaveAs(Form("%s_log.pdf",outfile));
-return 0;
-  }
 
-//////////////////2d fit
+delete dset_data_axis1;
+delete dset_rcone_axis1;
+delete dset_sideb_axis1;
+delete drconehist_axis1;
+delete dsidebhist_axis1;
 
-int do2dfit(){
-/*
-	gStyle->SetOptStat(111111);
-  Float_t leftrange=0. ;
-  Float_t rightrange=9.;
-  Int_t roovarbins=90;
-  TH1F::SetDefaultSumw2(kTRUE);
-  roovar1 = new RooRealVar("roovar1","roovar1",leftrange,rightrange);
-  roovar2 = new RooRealVar("roovar2","roovar2",leftrange,rightrange);
-  roovar1->setRange(leftrange,rightrange);
-  roovar2->setRange(leftrange,rightrange);
-  roovar1->setBins(roovarbins);
-  roovar2->setBins(roovarbins);
-  roovar1->SetTitle("Iso_{1}");
-  roovar2->SetTitle("Iso_{2}"); 
-  rooeta1 = new RooRealVar("rooeta1","rooeta1",0,2.5);
-  rooeta2 = new RooRealVar("rooeta2","rooeta2",0,2.5);
-  roopt1 = new RooRealVar("roopt1","roopt1",25,1000);
-  roopt2 = new RooRealVar("roopt2","roopt2",25,1000);
-  roosieie1 = new RooRealVar("roosieie1","roosieie1",0,0.045);
-  roosieie2 = new RooRealVar("roosieie2","roosieie2",0,0.045);
- roodiphopt = new RooRealVar("roodiphopt","roodiphopt",200.);
-  roorho = new RooRealVar("roorho","roorho",20.);
-  roosigma = new RooRealVar("roosigma","roosigma",1.);
-  roonvtx = new RooRealVar("roonvtx","roonvtx",20.);
-  rooweight = new RooRealVar("rooweight","rooweight",1.);
-  assert (roovar1);
-  assert (roovar1);
-  assert (roopt1);
-  assert (roosieie1);
-  assert (rooeta1);
-  assert (roopt2);
-assert (roodiphopt);
-  assert (roosieie2);
-  assert (rooeta2);
-  assert (roorho);
-  assert (roosigma);
-  assert (roonvtx);
-  assert (rooweight);
-  TH1::SetDefaultSumw2(kTRUE);
-  //Axis 1 and 2 randomly swapped
-  //TFile *fdata_std = new TFile("forroofit/2dstd_data_EBEB_forroofit.root","read");
-  TFile *fdata_std = new TFile("forroofit/2dstd_swaped_allmc_EBEB_forroofit.root","read");
-  get_roodset_from_ttree(fdata_std,"for_roofit",dataset_data);
-//both leading and subleading photon 
-// TFile *rcone = new TFile("forroofit/1drcone_template.root","read");
- TFile *rcone = new TFile("forroofit/2drcone_swaped_allmc_EBEB_forroofit.root","read");
-  get_roodset_from_ttree(rcone,"for_roofit",dataset_rcone);
-//first fake then true photon
-//  TFile *fdatasideb_b= new TFile("forroofit/side_signalband_data_EBEB_forroofit.root","read");
-TFile *fdatasideb_b= new TFile("forroofit/2drconesideband_swaped_allmc_EBEB_forroofit.root","read");
-  //signal+ sideband region first variable signal, second sideband
-// TFile *fdatasideb_b= new TFile("forroofit/1legsideband_swaped_allmc_EBEB_forroofit.root","read");
-//  TFile *fdatasideb_b= new TFile("forroofit/1dtemp_bkgtruth.root","read");
- get_roodset_from_ttree(fdatasideb_b,"for_roofit",dataset_datasideb_b);
-//both in sideband, randomly swapped
-  TFile *sideband= new TFile("forroofit/2dsideband_swaped_allmc_EBEB_forroofit.root","read");
-//TFile *sideband= new TFile("forroofit/1dsideb_template.root","read");
-  get_roodset_from_ttree(sideband,"for_roofit",dataset_sideband);
-
-  assert(fdata_std); assert(rcone); assert(fdatasideb_b);  assert(sideband);
-//cut away overflow bin
-  if (dataset_data) dset_data1 = (RooDataSet*)(dataset_data->reduce(Name("dset_data1"),Cut(Form("roovar1<%f",rightrange-1e-5))));
-  dset_data = (RooDataSet*)(dset_data1->reduce(Name("dset_data"),Cut(Form("roovar2<%f",rightrange-1e-5))));
-  if (dataset_rcone) dset_rcone1 = (RooDataSet*)(dataset_rcone->reduce(Name("dset_rcone1"),Cut(Form("roovar2<%f",rightrange-1e-5))));
-  dset_rcone = (RooDataSet*)(dset_rcone1->reduce(Name("dset_rcone"),Cut(Form("roovar1<%f",rightrange-1e-5))));
-if (dataset_datasideb_b) dset_sideb1 = (RooDataSet*)(dataset_datasideb_b->reduce(Name("dset_sideb1"),Cut(Form("roovar1<%f",rightrange-1e-5))));
-  dset_sideb = (RooDataSet*)(dset_sideb1->reduce(Name("dset_sideb"),Cut(Form("roovar2<%f",rightrange-1e-5))));
-  if (dataset_sideband) dset_sideb2s1 = (RooDataSet*)(dataset_sideband->reduce(Name("dset_sideb2s1"),Cut(Form("roovar1<%f",rightrange-1e-5))));
-  dset_sideb2s = (RooDataSet*)(dset_sideb2s1->reduce(Name("dset_sideb2s"),Cut(Form("roovar2<%f",rightrange-1e-5))));
-
-    const float pp_init = 0.30;
-        const float pf_init = 0.23;//0.33
-//give initial values for purity fraction -j1 overall purity for leg 1 
-  RooRealVar *pp = new RooRealVar("pp","pp",pp_init,0,1);
-
-   RooRealVar *j1 = new RooRealVar("j1","j1",pp_init+pf_init,0,1);
-
-   //  RooRealVar *j1_pf = new RooRealVar("j1_pf","j1_pf",pf_init,0,1);
-//  RooRealVar *j2 = new RooRealVar("j2","j2",pp_init+pf_init,0,1);
-//  RooRealVar *j2_pf = new RooRealVar("j2_pf","j2_pf",pf_init,0,1);
-  RooFormulaVar *fsig1 = new RooFormulaVar("fsig1","fsig1","j1",RooArgList(*j1));
-  //RooFormulaVar *fsig2 = new RooFormulaVar("fsig2","fsig2","j2",RooArgList(*j2));
-  RooFormulaVar *fsigsig = new RooFormulaVar("fsigsig","fsigsig","pp",RooArgList(*pp));
-  RooFormulaVar *fsigbkg = new RooFormulaVar("fsigbkg","fsigbkg","fsig1-pp",RooArgList(*fsig1,*pp));
-RooFormulaVar *fbkgbkg = new RooFormulaVar("fbkgbkg","fbkgbkg","1-fsigsig-fsigbkg",RooArgList(*fsigsig,*fsigbkg));
- RooDataHist *sigsigdhist = new RooDataHist("sigsigdhist","sigsigdhist",RooArgList(*roovar1,*roovar2),*dset_rcone);
-    RooDataHist *sigbkgdhist = new RooDataHist("sigbkgdhist","sigbkgdhist",RooArgList(*roovar1,*roovar2),*dset_sideb);
-    RooDataHist *bkgbkgdhist = new RooDataHist("bkgbkgdhist","bkgbkgdhist",RooArgList(*roovar1,*roovar2),*dset_sideb2s);
-  RooAbsPdf*    sigsigpdf = new RooHistPdf("sigsigpdf","sigsigpdf",RooArgList(*roovar1,*roovar2),*sigsigdhist);
-  RooAbsPdf*    sigbkgpdf = new RooHistPdf("sigbkgpdf","sigbkgpdf",RooArgList(*roovar1,*roovar2),*sigbkgdhist);
-   RooAbsPdf*   bkgbkgpdf = new RooHistPdf("bkgbkgpdf","bkgbkgpdf",RooArgList(*roovar1,*roovar2),*bkgbkgdhist);
-// TFile *res_firstpass = new TFile("result1d.root","read");
-      //    float lowerbounds[4]={0,f1p-1,f2p-1,f1p+f2p-1};
-//    float upperbounds[4]={1,f1l,f2l,f1l+f2l};
-    float lowerbounds[4]={0,5.2698e-01-1,5.2698e-01-1,5.2698e-01+5.2698e-01-1};
-    float upperbounds[4]={1,5.2698e-01,5.2698e-01,5.2698e-01+5.2698e-01};
-
-    float minpp = TMath::MaxElement(4,lowerbounds);
-    float maxpp = TMath::MinElement(4,upperbounds);
-    pp->setVal((minpp+maxpp)/2);
-RooFitResult *secondpass;
- //   RooGaussian *constraint_gaussian_j1 = new RooGaussian("constraint_gaussian_j1","constraint_gaussian_j1",*j1,RooRealConstant::value(j1->getVal()),RooRealConstant::value(j1->getPropagatedError(*firstpass)));
-RooGaussian *constraint_gaussian_j1 = new RooGaussian("constraint_gaussian_j1","constraint_gaussian_j1",*j1,RooRealConstant::value(j1->getVal()),RooRealConstant::value(j1->getError()));
-RooArgSet *constraint_pdf_set = new RooArgSet(*constraint_gaussian_j1);
-    RooArgSet *constraint_parameters_set = new RooArgSet(*j1);
-RooConstraintSum *constraint_gaussian_nll = new RooConstraintSum("constraint_gaussian_nll","constraint_gaussian_nll",*constraint_pdf_set,*constraint_parameters_set);
+delete drconepdf_axis1;  
+delete dsidebpdf_axis1;
+//delete frame1bla;
+//delete frame1logbla;
+print_mem();
+  return 0;
+ 
 
 
-    RooAddPdf *model_2D_uncorrelated = new RooAddPdf("model_2D_uncorrelated","model_2D_uncorrelated",RooArgList(*sigsigpdf,*sigbkgpdf,*bkgbkgpdf),RooArgList(*fsigsig,*fsigbkg,*fbkgbkg),kFALSE);
-    RooNLLVar *model_2D_uncorrelated_noextended_nll = new RooNLLVar("model_2D_uncorrelated_noextended_nll","model_2D_uncorrelated_noextended_nll",*model_2D_uncorrelated,*dset_data,NumCPU(8));
-    RooAddition *model_2D_uncorrelated_noextended_nll_constraint = new RooAddition("model_2D_uncorrelated_noextended_nll_constraint","model_2D_uncorrelated_noextended_nll_constraint",RooArgSet(*model_2D_uncorrelated_noextended_nll,*constraint_gaussian_nll));
-
-
-    RooMinimizer *minuit_secondpass_constraint = new RooMinimizer(*model_2D_uncorrelated_noextended_nll_constraint);
-    minuit_secondpass_constraint->migrad();
-    minuit_secondpass_constraint->hesse();
-    RooFitResult *secondpass_constraint;
-    secondpass_constraint = minuit_secondpass_constraint->save("secondpass_constraint","secondpass_constraint");
-    secondpass_constraint->Print();  
-RooMinimizer *minuit_secondpass = new RooMinimizer(*model_2D_uncorrelated_noextended_nll);
-    minuit_secondpass->migrad();
-    minuit_secondpass->hesse();
-secondpass = minuit_secondpass->save("secondpass","secondpass");
-     secondpass->Print();
-   cout << "pp " << fsigsig->getVal() << " " << fsigsig->getPropagatedError(*secondpass) << std::endl;
- cout << "pf " << fsigbkg->getVal() << " " << fsigbkg->getPropagatedError(*secondpass) << std::endl; 
-     cout << "ff " << fbkgbkg->getVal() << " " << fbkgbkg->getPropagatedError(*secondpass) << std::endl;
-
-
-
-      TCanvas *c4 = new TCanvas("c4","c4",1200,800);
-      c4->Divide(2,2);
-        c4->cd(1);
-        RooPlot *frame1final = roovar1->frame(Title("Fit axis 1 - binned"));
-        dset_data->plotOn(frame1final,Name("data"));
-        model_2D_uncorrelated->plotOn(frame1final,Name("fit"));
-        sigsigpdf->plotOn(frame1final,Normalization(fsigsig->getVal(),RooAbsPdf::Relative),Name("plot_sigsig_axis1"),LineStyle(kDashed),LineColor(kRed));
-        sigbkgpdf->plotOn(frame1final,Normalization(fsigbkg->getVal(),RooAbsPdf::Relative),Name("plot_sigbkg_axis1"),LineStyle(kDashed),LineColor(kGreen));
-        bkgbkgpdf->plotOn(frame1final,Normalization(fbkgbkg->getVal(),RooAbsPdf::Relative),Name("plot_bkgbkg_axis1"),LineStyle(kDashed),LineColor(kBlack));
-        frame1final->Draw();
-        //    c2->GetPad(1)->SetLogy(1);
-        TLegend *leg = new TLegend(0.18,0.74,0.38,0.94);
-        leg->AddEntry("data","data","lp");
-        leg->AddEntry("fit","fit","l");
-        leg->AddEntry("plot_sigsig_axis1","prompt-prompt","l");
-        leg->AddEntry("plot_sigbkg_axis1","prompt-fake","l");
-        leg->AddEntry("plot_bkgbkg_axis1","fake-fake","l");
-        leg->SetFillColor(kWhite);
-        leg->Draw();
-
-        c4->cd(2);
-        RooPlot *frame2final = roovar2->frame(Title("Fit axis 2 - binned"));
-        dset_data->plotOn(frame2final);
-        model_2D_uncorrelated->plotOn(frame2final);
-        sigsigpdf->plotOn(frame2final,Normalization(fsigsig->getVal(),RooAbsPdf::Relative),LineStyle(kDashed),LineColor(kRed));
-        sigbkgpdf->plotOn(frame2final,Normalization(fsigbkg->getVal(),RooAbsPdf::Relative),LineStyle(kDashed),LineColor(kGreen));
-        bkgbkgpdf->plotOn(frame2final,Normalization(fbkgbkg->getVal(),RooAbsPdf::Relative),LineStyle(kDashed),LineColor(kBlack));
-        frame2final->Draw();
-        //    c2->GetPad(2)->SetLogy(1);
-        leg->Draw();
-
-
-
-
-
-
-  c4->SaveAs("../plots/2dfitrcone_log.png");
-  c4->SaveAs("../plots/2dfitrcone_log.pdf");
-  c4->SaveAs("../plots/2dfitrcone_log.root");
-*/
-	return 0;
 }
-
-
-
-
-
-
-
 
 

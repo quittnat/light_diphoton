@@ -19,8 +19,8 @@
 using namespace std;
 //Float_t pixel_lumi= 19.7;
 Float_t pixel_lumi= 1.;
-bool areascaled=true;bool eff_calc=true;
-bool doswap=false;
+bool areascaled=false;bool eff_calc=false;
+//bool doswap=false;
 TFile *f;TFile *f_h;
 TTree *tree;
 Float_t xbins[66];
@@ -28,7 +28,8 @@ Long64_t nentries;
 int u=0;int v=0;int y=0;int w=0;
 TH1F* h_pvz; TH1F* h_h2ggvz; TH1F * h_allz;
 TH1F* h_pv;TH1F* h_h2ggv;TH1F* h_truth; TH1F* h_all; TH2F* h_eratio;TH1F* h_geniso;TH1F* h_genisotruth; TH1F* h_isowv;
-TVector3 primvtx; TVector3 genvtx;TVector3 h2ggvtx; TVector3 genvtx_trail;
+
+
 void PrintProgress(Long64_t entry){
     int step = 10; 
     // Adapt step in powers of 10 (every 10 below 100, every 100 below 1000, etc.)
@@ -44,12 +45,6 @@ void PrintProgress(Long64_t entry){
         cout << ">>> Processing last event # " << entry << endl;
 }
 
- //bool vector_compare(TVector3 v1,TVector3 v2){
-	 //in 1mm in x and y and 1 cm in z
-// 	if((v1.X()-v2.X()< 0.1)&&(v1.Y()-v2.Y()< 0.1)&&(v1.X()-v2.X()< 1.))
-	
-//	return true;
-//}
 
 
 void light::Loop()
@@ -71,11 +66,12 @@ void light::Loop()
 	else if(etarange=="EEEE") {seta="EEEE";  EEEE=true;}
 	else if(etarange=="fulletarange") {seta="fulletarange"; fulletarange=true;}
 	else {cout << "etarange not correct "<< endl;}
-	const char* fitfilename=Form("../forroofit/mc%s_%s_madgraph.root",(sel.Data()), (seta.Data()));
+    cout << "doswap " << doswap << endl;
+	const char* fitfilename=Form("../forroofit/March03/mc%s_%s%s.root",(sel.Data()), (seta.Data()),(doswap) ? "_rev" : "");
+//	const char* fitfilename=Form("test.root");
 	f = new TFile(fitfilename,"RECREATE");
 	cout << fitfilename << endl;
 	h_iso= new TH1F("h_iso","h_iso",90, 0.,9.);
-
 	h_geniso= new TH1F("h_geniso","h_geniso",2000, -1000.,1000.);
 	h_genisotruth= new TH1F("h_genisotruth","h_geniso",90, 0.,9.);
 	h_truth=new TH1F("h_truth","h_truth",2,0.,2.);
@@ -90,11 +86,11 @@ void light::Loop()
 	h_isowv= new TH1F("h_isowv","h_isowv",90, 0.,9.);
 	h_isogen= new TH1F("h_isogen","h_isogen",90, 0.,9.);
 	h_pt= new TH1F("h_pt","h_pt", 200, 0., 400.);
-	h_diphopt= new TH1F("h_diphopt","h_diphopt",100,0.,1000.);
-	h_h2ggv_diphopt= new TH1F("h_h2ggv_diphopt","h_h2ggv_diphopt",100,0.,1000.);
+	h_diphopt= new TH1F("h_diphopt","h_diphopt",1000,0.,1000.);
+	h_h2ggv_diphopt= new TH1F("h_h2ggv_diphopt","h_h2ggv_diphopt",1000,0.,1000.);
 	eff_h2ggv_diphopt= new TGraphAsymmErrors();
 	eff_pv_diphopt= new TGraphAsymmErrors();
-	h_pv_diphopt= new TH1F("h_pv_diphopt","h_pv_diphopt",100,0.,1000.);
+	h_pv_diphopt= new TH1F("h_pv_diphopt","h_pv_diphopt",1000,0.,1000.);
 	h_diphomass= new TH1F("h_diphomass","h_diphomass", nbins, xbins);
 	h_weight =new TH1F("h_weight","h_weight", 500, 0.,50.); 
     h_eratio=new TH2F("h_eratio","h_eratio",100, 0.,1.,2000,-1000.,1000.);
@@ -164,18 +160,17 @@ void light::Loop()
 			 gen_code_l = pholead_PhoMCmatchexitcode;
 			 geniso_l = pholead_GenPhotonIsoDR04;
 	//also valide for sherpa as all set to status 2
-			 if ((gen_code_l==1 || gen_code_l==2) && ((geniso_l<5.)&& (geniso_l >=0.))) {kSignal_l=1;}//cout << "true L worked" << endl; if(pholead_PhoMCmatchexitcode==2) {cout << "pholead status 2" <<        endl;}     }
+			 if ((gen_code_l==1 || gen_code_l==2) && ((geniso_l<5.)&& (geniso_l >=0.))) {kSignal_l=1;}
 			 else if (gen_code_l==4) {kElectron_l=2; }
-			 else{kSignal_l=0;}// cout << "fake" <<endl;}
-		//	 else{cout << "no fucking truth matching " << endl;}
+			 else{kSignal_l=0;}
 			 gen_code_t = photrail_PhoMCmatchexitcode;
 			 geniso_t = photrail_GenPhotonIsoDR04;
-			  // if (gen_code_t==1 || gen_code_t==2) cout << "code matching t worked" << endl; 
-			 if ((photrail_PhoMCmatchexitcode==1 ||photrail_PhoMCmatchexitcode==2)&&(geniso_t<5.)&& (geniso_l >=0.)){kSignal_t=1;}//cout << "true t worked" << endl;  if(photrail_PhoMCmatchexitcode==2) {cout << "photrail status 2" << endl;} }
+			 if ((photrail_PhoMCmatchexitcode==1 ||photrail_PhoMCmatchexitcode==2)&&(geniso_t<5.)&& (geniso_l >=0.)){kSignal_t=1;}
 			 else if (gen_code_t==4) {kElectron_t=2; }
-			 else {kSignal_t=0;}// cout << "fake" <<endl;}
+			 else {kSignal_t=0;}
 			 rootruth1=kSignal_l; 
 			 rootruth2=kSignal_t;
+			// cout << "rootruth1 " << rootruth1 << "rootruth2 " << rootruth2 << endl;
 		 }
 
 //selection setting
@@ -188,7 +183,8 @@ void light::Loop()
 	     else if(sel=="2dside") do2dside=true;
 	     else if(sel=="2d1side") do2d1side=true;
 		 else if((sel=="2dff")&&(rootruth1==0 && rootruth2==0)){do2dff=true;}
-		 else cout << "no selection " << endl;
+		 else {cout << "no selection " << endl;
+			 cout << "rootruth1 " << rootruth1 << "rootruth2 " << rootruth2 << endl;}
 		 if((do2d1side || do1f1p)){
 	//event_pass12whoissiglike==0 leading photon signal region, subleading sideban
 	//only for truth match for swaping -> all photons in signal band are in roovar1, all photons in sideband are in roovar2 
@@ -199,7 +195,7 @@ void light::Loop()
 				 if(event_pass12whoissiglike==0) { doswap=false;}
 				 if(event_pass12whoissiglike==1) { doswap=true;}
 		 }     
- //       else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone ) { if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
+        else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone ) { if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
 	
 		 if(!doswap){
 			  if(do2dpp || do2dstd || do1p1f || do2dff || do2d1side || do2dside || do1f1p){
@@ -263,24 +259,17 @@ void light::Loop()
 		 diphomass=(pho1+pho2).M();
 		 roodiphopt=diphopt;
 		 roodiphomass=diphomass;
+		
 		 //see if primary vertex and/or h2ggvtx matches gen vertex
 		 if(!isdata){
-			 primvtx.SetXYZ(primVtxx,primVtxy,primVtxz);
-				h2ggvtx.SetXYZ(diphoton_h2ggvtx_Vx,diphoton_h2ggvtx_Vy,diphoton_h2ggvtx_Vz);
-				genvtx_trail.SetXYZ(photrail_GenVx,photrail_GenVy,photrail_GenVz);
-				genvtx.SetXYZ(pholead_GenVx,pholead_GenVy,pholead_GenVz);
-				//dogenvtx
-				//if(genvtx==primvtx){ pv_match=true;v++;}
 				if(fabs((pholead_GenVz-primVtxz)) < 1.){ pv_match=true;}
 				else {pv_match=false;w++;}
-			//	else {pv_match=true;}
 				if(fabs((pholead_GenVz-diphoton_h2ggvtx_Vz)) < 1.) {h2ggv_match=true;}
 				else {h2ggv_match=false;y++;}
-		//		else h2ggv_match=true;
 		 }
 		 if ((EBEB && (rooeta1 < 1.4442 && rooeta2 < 1.4442)) ||(m1EE && (rooeta1 > 1.566 || rooeta2 > 1.566))||(EEEE && (rooeta1 > 1.566 && rooeta2 > 1.566))|| fulletarange){  
 				 f->cd();
-			 h_weight->Fill(weight);
+		      	 h_weight->Fill(weight);
 				 h_diphomass->Fill(diphomass,weight);
 				 h_diphopt->Fill(diphopt,weight); 
 				 if(diphopt < 250.){
@@ -292,31 +281,22 @@ void light::Loop()
 				 if(h2ggv_match){h_h2ggv_diphopt->Fill(diphopt,weight);v++;h_h2ggv->Fill(1.,weight);}
 				//vertex studies
 				if((do2dff || do2dpp ||do2dside || do2dstd || do2drcone)){
-						tree->Fill();
+						if((do2dpp || do2drcone) &&(randomgen->Uniform(0.,1.)>0.9)){
+							tree->Fill();
+						}
 						h_all->Fill(1.,weight);
 						 h_geniso->Fill(photrail_GenPhotonIsoDR04,weight);
 						 h_iso->Fill(roovar1,weight);
 						 h_isopv->Fill(rooisopv1,weight);
-						// h_iso->Fill(roovar2,weight);
-					//	 h_isopv->Fill(rooisopv2,weight);
 						 h_isowv->Fill(rooisowv1,weight);
-					//	 h_isowv->Fill(rooisowv2,weight);
-	//					if((photrail_PhoMCmatchexitcode==1 ||photrail_PhoMCmatchexitcode==2) &&(photrail_GenPhotonIsoDR04<5)) {
-	//						v++;
-//							h_truth->Fill(1.,weight);h_isogen->Fill(roovar1,weight);h_isogen->Fill(roovar2,weight);
-//							h_genisotruth->Fill(photrail_GenPhotonIsoDR04,weight);
-//						}
 				}	
 				else if(do2d1side || do1f1p ||do2drconeside ||do1p1f){
-//					if(randomgen->Uniform(0.,1.)>0.5)	{tree->Fill();}
+					if(randomgen->Uniform(0.,1.)>0.5)	{
+						tree->Fill();
+					}
 				    h_all->Fill(1.,weight);
-					tree->Fill();	
+					//tree->Fill();	
    					h_iso->Fill(roovar1,weight);h_isopv->Fill(rooisopv1,weight);h_isowv->Fill(rooisowv1,weight);
-					 //279                     //  if((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1)) {h_isogen->Fill(roovar1,weight);h_isogen->Fill(roovar2,weight);}
-					//if(event_pass12whoissiglike==0) {   h_iso->Fill(roovar2,weight); h_isopv->Fill(rooisopv2,weight);}
-				//	if(event_pass12whoissiglike==1) {    h_iso->Fill(roovar1,weight);h_isopv->Fill(rooisopv1,weight);}
-				//	if((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1)) {h_isogen->Fill(roovar1,weight);h_isogen->Fill(roovar2,weight);}
-
 				}	 
  		 }
 
@@ -327,10 +307,6 @@ void light::Loop()
 	}
 //LOOP over events finished
 	
-    h_all->Draw();
-//	h_geniso->SaveAs("h_geniso.root");
-//	h_genisotruth->SaveAs("h_genisotruth.root");
-//    h_eratio->SaveAs("h_eratio.root");
 	cout << "  h_all->Integral()  " << h_all->Integral()  <<  endl;
 	
 //	  cout << "h_pv integral " << h_pv->Integral() << endl;
@@ -376,12 +352,13 @@ void light::Loop()
 					  h_diphomass->SetBinContent(bin+1,h_diphomass->GetBinContent(bin+1)/(h_diphomass->GetBinWidth(bin+1)));
 					  h_diphomass->SetBinError(bin+1,h_diphomass->GetBinError(bin+1)/(h_diphomass->GetBinWidth(bin+1)));}
 			
-		/*	if(areascaled){
+			if(areascaled){
 				h_iso->Scale(1.0/h_iso->Integral()); h_sieie->Scale(1.0/h_sieie->Integral()); h_diphomass->Scale(1.0/h_diphomass->Integral());h_diphopt->Scale(1.0/h_diphopt->Integral());
 				h_pv_diphopt->Scale(1.0/h_pv_diphopt->Integral()); h_h2ggv_diphopt->Scale(1.0/h_h2ggv_diphopt->Integral());
 				h_isopv->Scale(1.0/h_isopv->Integral()); h_isogen->Scale(1.0/h_isogen->Integral());h_isowv->Scale(1.0/h_isowv->Integral());
-			}	 */
+			}	 
  f->Write();f->Close();
+
 }
 
 

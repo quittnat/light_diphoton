@@ -67,7 +67,7 @@ void light::Loop()
 	else if(etarange=="fulletarange") {seta="fulletarange"; fulletarange=true;}
 	else {cout << "etarange not correct "<< endl;}
     cout << "doswap " << doswap << endl;
-	const char* fitfilename=Form("../forroofit/March03/mc%s_%s%s.root",(sel.Data()), (seta.Data()),(doswap) ? "_rev" : "");
+	const char* fitfilename=Form("../forroofit/March09/mc%s_%s%s.root",(sel.Data()), (seta.Data()),(doswap) ? "_rev" : "");
 //	const char* fitfilename=Form("test.root");
 	f = new TFile(fitfilename,"RECREATE");
 	cout << fitfilename << endl;
@@ -189,14 +189,21 @@ void light::Loop()
 	//event_pass12whoissiglike==0 leading photon signal region, subleading sideban
 	//only for truth match for swaping -> all photons in signal band are in roovar1, all photons in sideband are in roovar2 
 				 if(event_pass12whoissiglike==0) { doswap=true;}
-				 if(event_pass12whoissiglike==1) { doswap=false;}
+				 else if(event_pass12whoissiglike==1) { doswap=false;}
 		 }     
 		 else if(do2drconeside||do1p1f){//get rcone from case where one passes photon selection, one in sideband. put passing photons in first branch
 				 if(event_pass12whoissiglike==0) { doswap=false;}
-				 if(event_pass12whoissiglike==1) { doswap=true;}
+			     else if(event_pass12whoissiglike==1) { doswap=true;}
 		 }     
-        else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone ) { if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
-	
+        else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone ) {
+			//cout << "randomgen" << randomgen->Uniform(0.,1.) << "doswap " << doswap << endl; if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
+			double rand=randomgen->Uniform(0.,1.);
+	      	if(rand>0.5){ doswap=true;}
+			else if(rand<0.5){ doswap=false;}
+//		cout << "rand" << rand << "doswap " << doswap << endl;
+        	}
+		   //	if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
+         	
 		 if(!doswap){
 			  if(do2dpp || do2dstd || do1p1f || do2dff || do2d1side || do2dside || do1f1p){
 				  rooisopv1= pholead_PhoSCRemovalPFIsoCharged;
@@ -280,10 +287,14 @@ void light::Loop()
 				 if(pv_match){h_pv_diphopt->Fill(diphopt,weight);u++;h_pv->Fill(1.,weight);}
 				 if(h2ggv_match){h_h2ggv_diphopt->Fill(diphopt,weight);v++;h_h2ggv->Fill(1.,weight);}
 				//vertex studies
-				if((do2dff || do2dpp ||do2dside || do2dstd || do2drcone)){
-						if((do2dpp || do2drcone) &&(randomgen->Uniform(0.,1.)>0.9)){
+				if((do2dff || do2dpp ||do2dside || do2dstd || do2drcone)){ 
+					//to get 10 % of the overall events: already 50% because of random switch, only > 80% to end up with 10% of the overall entries
+			//		    if((do2dpp || do2drcone) &&(randomgen->Uniform(0.,1.)>0.8)){
+			//				tree->Fill();
+			//			}
+			//			else if((!do2dpp && !do2drcone)||do2dff || do2dside || do2dstd){
 							tree->Fill();
-						}
+			//			}
 						h_all->Fill(1.,weight);
 						 h_geniso->Fill(photrail_GenPhotonIsoDR04,weight);
 						 h_iso->Fill(roovar1,weight);
@@ -291,11 +302,16 @@ void light::Loop()
 						 h_isowv->Fill(rooisowv1,weight);
 				}	
 				else if(do2d1side || do1f1p ||do2drconeside ||do1p1f){
-					if(randomgen->Uniform(0.,1.)>0.5)	{
+				// to build 50 % of the original signal/rcone template here all true photons projected on axis 1
+					if((do1p1f || do2drconeside) && randomgen->Uniform(0.,1.)>0.5)	{
+			//		//to build 10% of the original signal/rcone template here all true photons projected on axis 1, this is why keep 0.9
+			//		if((do2drconeside || do1p1f) && randomgen->Uniform(0.,1.)>0.9)	{
+							tree->Fill();
+					}
+					else if ((do2d1side || do1f1p) && (!do2drconeside && !do1p1f) ){
 						tree->Fill();
 					}
 				    h_all->Fill(1.,weight);
-					//tree->Fill();	
    					h_iso->Fill(roovar1,weight);h_isopv->Fill(rooisopv1,weight);h_isowv->Fill(rooisowv1,weight);
 				}	 
  		 }

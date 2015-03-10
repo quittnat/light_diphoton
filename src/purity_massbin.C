@@ -4,27 +4,22 @@
 //
 #include "TROOT.h"
 #include <iostream>
+#include "TFile.h"
 #include <TStyle.h>
 #include "TGraphErrors.h"
 #include "TCanvas.h"
+#include "TPad.h"
 #include  "TLegend.h"
 #include "TAxis.h"
+#include "TString.h"
 #include "TH2F.h"
 #include <Riostream.h>
-//#include <fstream.h>
+#include "TTree.h"
 #include <stdlib.h>
-//#include <iomanip.h>
 #include <string.h>
 using namespace std;
-int nbins=10;
-// Define User fit function: 2 exponentials + 1 constant
-
-//Double_t fitf(Double_t *x, Double_t *par)
-//{  
-//Double_t fitval=fabs(par[0])*exp(-x[0]/par[3])+fabs(par[1])*exp(-x[0]/par[4])+fabs(par[2]);
-//return fitval;
-//}
-
+//massbins
+const int nbins=20;
 //main script
 int plot()
 {
@@ -37,140 +32,123 @@ gStyle->SetStatFont(63);
 gStyle->SetStatFontSize(30); 
 gStyle->SetPadLeftMargin(0.15);
 gStyle->SetPadBottomMargin(0.17);
-
- Double_t mvec[10] ;
- Double_t pvec[10] ;
- Double_t errvec[10] ;
- Double_t xvec[10];
- Double_t mvect[10] ;
- Double_t pvect[10] ;
- Double_t errvect[10] ;
- Double_t xvect[10];
- Double_t mvecr[10] ;
- Double_t pvecr[10] ;
- Double_t errvecr[10] ;
- Double_t xvecr[10];
-
- char str[100];
- double value1;
- double value2;
- double value3;
- double value1t;
- double value2t;
- double value3t;
- double value1r;
- double value2r;
- double value3r;
- int i=0;
-
 // Define Canvas
 
- TCanvas *c1 = new TCanvas("c1","Graph",0,0,1024,768);
-TLegend* leg = new TLegend(0.6,0.7,0.7,0.8);
- leg->SetFillColor(10);
- leg->SetLineColor(10);
- leg->SetTextSize(0.03);
- leg->SetTextFont(42);
- c1->Clear();
-   c1->cd(1);
+TCanvas *cres = new TCanvas("cres","Graph",0,0,1024,768);
+TLegend* leg = new TLegend(0.6,0.8,0.7,0.88);
+leg->SetFillColor(10);
+leg->SetLineColor(10);
+leg->SetTextSize(0.03);
+leg->SetTextFont(42);
 
+/////////////count purity directly from diphotonminitree file
+//
+
+TFile* fcp;TFile* f1;TFile* f2;TFile* f3;TFile* f4;
+fcp=new TFile("../plots/March09/150309_purity_counting.root","READ");
+assert(fcp);
+TCanvas *ccp = (TCanvas*)fcp->Get("c1");
+assert(ccp);
+TPad* padcp=(TPad*)ccp->GetPrimitive("pad1");
+//TGraphErrors* grcp=(TGraphErrors*)padcp->GetPrimitive("grEB");
+TGraphErrors* grcp=(TGraphErrors*)padcp->GetPrimitive("grnEB");
+assert(grcp);
+// TGraphErrors* grEB=(TGraphErrors*)ccp->GetPrimitive("grEB");
+// TGraphErrors* grnEB=(TGraphErrors*)ccp->GetPrimitive("grnEB");
+///////////// 
+const char *path=Form("150306_truth_purity_nEBEB_massbin_20_range");
 //read in mass bins and purity
- ifstream infileu("../plots/March02/EBEB/rcone_sideband/massbinnned/purity_rcone_sideband_EBEB.txt",ios::in);
- if(!infileu.is_open()){
-   cout<<"No inputfile1 to open!"<<endl;
-   return -1;
- } 
- for (i=0;i<nbins;i++){
-   infileu.getline(str,256);
-   sscanf(str,"%lf %lf %lf", &value1, &value2, &value3);
-  mvec[i] = value1; pvec[i] = value2;errvec[i] = value3;
-  xvec[i]=0.;
- cout << i <<" mass bins : " << mvec[i] << " purity+ error "<< pvec[i] << " " << errvec[i] << endl;
- }
- infileu.close();
-/*
- ifstream infiler("../plots/March03/EBEB/rebinned/purity_rcone_sideband_EBEB_rebinned.txt",ios::in);
- if(!infiler.is_open()){
-   cout<<"No inputfile2 to open!"<<endl;
-   return -1;
- } 
- for (i=0;i<nbins;i++){
-   infiler.getline(str,256);
-   sscanf(str,"%lf %lf %lf", &value1r, &value2r, &value3r);
-  mvecr[i] = value1r; pvecr[i] = value2r;errvecr[i] = value3r;
-  xvecr[i]=0.;
- cout << i <<" mass bins : " << mvecr[i] << " purity+ error "<< pvecr[i] << " " << errvecr[i] << endl;
- }
-*/
+//truthfit
+f1=new TFile(Form("../plots/March05/truthfit/nEBEB/%s_0_11.root",path),"READ");
+assert(f1);
+TCanvas *c1 = (TCanvas*)f1->Get("cgr");
+assert(c1);
+TGraphErrors* gr1=(TGraphErrors*)c1->GetPrimitive("Graph");
+assert(gr1); 
+const int	nbins1=gr1->GetN();
+cout << "nbins1 " << nbins1<<endl;
+//for (i=0;i< nbins1;i++){
+//mvec[i]=gr1->GetXaxis()->GetBinUpEdge(i);
+//cout << "mvec[i]" << mvec[i] << endl;
+// }
+f2=new TFile(Form("../plots/March05/truthfit/nEBEB/%s_10_21.root",path),"READ");
+assert(f2);
+TCanvas *c2 = (TCanvas*)f2->Get("cgr");
+assert(c2);
+TGraphErrors* gr2=(TGraphErrors*)c2->GetPrimitive("Graph");
+assert(gr2);
 
- ifstream infilet("../plots/March02/EBEB/truth_fit/massbinned/purity_truth_EBEB.txt",ios::in);
- if(!infilet.is_open()){
-   cout<<"No inputfile3 to open!"<<endl;
-   return -1;
- }
-//TH2F* gr2=new TH2F("gr2","gr2",nbins,0.,3000.,nbins,0.,1.);
- for (i=0;i<nbins;i++){
-   infilet.getline(str,256);
-   sscanf(str,"%lf %lf %lf", &value1t, &value2t, &value3t);
-  mvect[i] = value1t; pvect[i] = value2t;errvect[i] = value3t;
-  xvect[i]=0.;
-/*   if(i!=0){
-	   mvec[i]=mvec[i]-(mvec[i]-mvec[i-1])/2;
-	   xvec[i]=(mvec[i]-mvec[i-1])/2;
-   }
-   else if(i==0) {
-	   mvec[i]=79/2.;
-	   xvec[0]=79./2.;}
-*/	   
-//   gr2->Fill(mvec[i],pvec[i]);
- //  gr2->SetBinError(i,errvec[i]);
- cout << i <<" mass bins : " << mvect[i] << " purity+ error "<< pvect[i] << " " << errvect[i] << endl;
- }
- infilet.close();
+const int	nbins2=gr2->GetN();
+cout << "nbins2 " << nbins2<<endl;
+//rcone
+//const char *path2=Form("150306_truth_purity_nEBEB_massbin_20_range");
+const char *path2=Form("150306_rcone_sideb_purity_nEBEB_massbin_20_range");
+f3=new TFile(Form("../plots/March05/templates/nEBEB/%s_0_11.root",path2),"READ");
+//f3=new TFile("../plots/March05/templates/nEBEB/150306_rcone_sideb_purity_nEBEB_massbin_20_range_0_11.root","READ");
+//f3=new TFile(Form("../plots/March05/truthfit/nEBEB/%s_0_11.root",path2),"READ");
+assert(f3);
+TCanvas *c3 = (TCanvas*)f3->Get("cgr");
+assert(c3);
+TGraphErrors* gr3=(TGraphErrors*)c3->GetPrimitive("Graph");
+assert(gr3);
 
-// draw graph with crystal  data
-
- TGraph *gr2 = new TGraphErrors(nbins, mvec, pvec,xvec,errvec);
- TGraph *gr = new TGraphErrors(nbins, mvect, pvect,xvect,errvect);
- //TGraph *grr = new TGraphErrors(nbins, mvecr, pvecr,xvecr,errvecr);
-c1->SetLogx();
-c1->SetGridy();
- gr2->SetTitle("mgg EBEB");
-gr2->SetMarkerStyle(20);
- gr2->SetMarkerSize(1.3);
- gr2->GetYaxis()->SetTitle("purity");
- gr2->GetXaxis()->SetTitle("diphoton mass [GeV]");
-//  gr2->GetXaxis()->SetLimits(0.,3000.);
- //gr2->GetXaxis()->SetRangeUser(0.01,1000.);
-gr2->GetYaxis()->SetRangeUser(.4,1.);
- gr2->GetYaxis()->SetTitleOffset(1.2);
+//f4=new TFile("../plots/March05/templates/nEBEB/150306_rcone_sideb_purity_nEBEB_massbin_20_range_10_21.root","READ");
+f4=new TFile(Form("../plots/March05/templates/nEBEB/%s_10_21.root",path2),"READ");
+//f4=new TFile(Form("../plots/March05/truthfit/EBEB/%s_10_21.root",path2),"READ");
+assert(f4);
+TCanvas *c4 = (TCanvas*)f4->Get("cgr");
+assert(c4);
+TGraphErrors* gr4=(TGraphErrors*)c4->GetPrimitive("Graph");
+assert(gr4);
+//plot
+cres->cd();
+TPad *pad1 = new TPad("pad1","",0,0,1,1);
+pad1->Draw();
+pad1->cd(); 
+pad1->SetGridy();
+pad1->SetGridy();
+pad1->SetLogx();
+//gr1->SetTitle("mgg nEBEB");
+//gr1->SetTitle("mgg nEBEB purity, truth & template fit");
+gr1->GetYaxis()->SetTitle("purity");
+gr1->GetXaxis()->SetTitle("diphoton mass [GeV]");
+//gr1->GetXaxis()->SetRangeUser(50.,3000.);
+gr1->GetXaxis()->SetLimits(50.,3000.);
+//gr1->GetXaxis()->SetRange(50,3000);
+gr1->GetYaxis()->SetRangeUser(.1,1.);
+gr1->GetYaxis()->SetTitleOffset(1.2);
  //gr2->GetXaxis()->SetNdivisions(504);
  // gr2->GetYaxis()->SetNdivisions(503);
- gr2->SetMarkerStyle(20);
- gr2->SetMarkerColor(kRed);
- gr2->SetLineColor(kRed);
- gr2->SetMarkerSize(1.); 
- gr->SetMarkerStyle(20);
- gr->SetMarkerColor(kBlue);
- gr->SetLineColor(kBlue);
- gr->SetMarkerSize(1.); 
-/* grr->SetMarkerStyle(20);
- grr->SetMarkerColor(kBlack);
- grr->SetLineColor(kBlack);
- grr->SetMarkerSize(1.); 
- */
-  leg->AddEntry(gr2,"template fit purity ","p");    
-//  leg->AddEntry(grr,"template fit purity rebinned","p");    
-  leg->AddEntry(gr," truth fit purity ","p");    
- gr2->Draw("APL");
- gr->Draw("SAME PL");
-// grr->Draw("SAME PL");
- leg->Draw();
-// gPad->Modified();
+ 
+cout << __LINE__ << endl;
+ grcp->SetMarkerStyle(20);grcp->SetMarkerColor(kBlack); grcp->SetLineColor(kBlack); grcp->SetMarkerSize(1.3);
+cout << __LINE__ << endl;
+ gr1->SetMarkerStyle(20);gr1->SetMarkerColor(kRed); gr1->SetLineColor(kRed); gr1->SetMarkerSize(1.3);
+cout << __LINE__ << endl;
+ gr2->SetMarkerStyle(20);gr2->SetMarkerColor(kRed); gr2->SetLineColor(kRed); gr2->SetMarkerSize(1.3);
+ cout << __LINE__ << endl;
+ gr3->SetMarkerStyle(20);gr3->SetMarkerColor(kBlue); gr3->SetLineColor(kBlue); gr3->SetMarkerSize(1.3);
+ cout << __LINE__ << endl;
+ gr4->SetMarkerStyle(20);gr4->SetMarkerColor(kBlue); gr4->SetLineColor(kBlue); gr4->SetMarkerSize(1.3);
+cout << __LINE__ << endl;
+leg->AddEntry(grcp,"truth  nEBEB","p");    
+leg->AddEntry(gr2,"truth fit nEBEB","p");    
+leg->AddEntry(gr3,"template fit nEBEB","p");    
+cout << __LINE__ << endl;
+gr1->SetTitle("mgg nEBEB purity");
+gr1->Draw("AP");
+grcp->Draw("P");
+gr2->Draw(" P");
+gr3->Draw("P");
+gr4->Draw("P");
+leg->Draw();
+pad1->SetTicks(0,2);
+//cres->Print("../plots/March10/150310_purity_truth_etacomp.root","root");
+//cres->Print("../plots/March10/150310_purity_truth_etacomp.png","png");
+cres->Print("../plots/March10/150310_purity_nEBEB_truth_rconecomp.root","root");
+cres->Print("../plots/March10/150310_purity_nEBEB_truth_rconecomp.png","png");
+// cres->SaveAs(Form("../plots/March05/%s.root",path));
+// cres->SaveAs(Form("../plots/March05/%s.png",path));
 
- //c1->Print("150203_truth_purity_massbin.root","root");
-// c1->Print("150203_truth_purity_massbin.png","png");
- c1->Print("../plots/March03/nEBEB/150303_purity_massbin_nEBEB.root","root");
- c1->Print("../plots/March03/nEBEB/150303_purity_massbin_nEBEB.png","png");
 return 0;
 }

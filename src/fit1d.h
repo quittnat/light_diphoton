@@ -99,6 +99,7 @@ bool truthfit;
 bool massbinned=kTRUE;
 Bool_t EBEB;
 bool debug=kFALSE;
+bool check=kFALSE;
 
 //bins for reweihgting
 RooBinning tbins (0,9); 
@@ -209,7 +210,7 @@ void ratioplot(RooDataSet *data_axis1, RooDataSet *truth_axis1, Bool_t logplot);
 //double quantiles(TH1F* mass, int ntot, int nqtemp,int startn, int endn, TString eta_q,double _proptemp[], double dpmqtemp[]);
 int quantiles(TH1F* mass,double _proptemp[], double dpmqtemp[]);
 int plot_purity_massbin(double mass[],double masserr[],double pur[],double purerr[]) ; 
-int prep_dataset(TString eta="EBEB", Bool_t truthf=kFALSE,int ntotbins=10,int startbin=0, int endbin=11);
+int prep_dataset(TString eta="EBEB", Bool_t truthf=kFALSE,int ntotbins=10,int startbin=0, int endbin=2);
  void print_mem();
 const int numcpu=1;
  ProcInfo_t procinfo;

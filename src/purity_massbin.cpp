@@ -22,12 +22,10 @@
 #include <string.h>
 using namespace std;
 //massbins
-const int nbins=20;
+int nbins=0;
 const int split=2;
-Double_t dpmass_all[nbins];
-Double_t purity_all[nbins];
-Double_t w2err_all[nbins];
-int plot_pull()  
+
+int plot_pull(double dpmass[], double purity[], double w2err[],Bool_t truthcheck)  
 {
 //plot projections-should be gaussian
 //plot as a function of diphoton mass    
@@ -36,28 +34,41 @@ int plot_pull()
    	assert(fpull);
     TGraphAsymmErrors* grpull=(TGraphAsymmErrors*)fpull->Get("grEB");
 	assert(grpull);
-	Double_t pull[nbins];
-    cout <<"grpull->GetN() " <<grpull->GetN() << endl;
-//	if((grpull->GetN())==(nbins-1)){
-    
-	for(int k=0; k< nbins;k++)
+	//const int nbinspull=grpull->GetN();
+//	Double_t pull[nbins];
+//	Double_t errxl[nbins];
+//	Double_t errxh[nbins];
+	double *ppull=new double[nbins];
+	double  *perrxl=new double[nbins];
+	double *perrxh=new double[nbins];
+
+    cout <<"# entries of counting true photons " <<grpull->GetN() << endl;
+
+    if((grpull->GetN())==(nbins))
 	{
-			cout <<" grpull->GetY()[k] "<< grpull->GetY()[k] << "purity_all[k] " << purity_all[k] << "w2err_all[k] " << w2err_all[k] << endl;
-			pull[k]=((grpull->GetY()[k])-purity_all[k])/w2err_all[k];
-			cout << pull[k] << endl;
-	}
-//	}
-	TCanvas* cpull =new TCanvas("cpull","cpull");
+    
+		for(int k=0; k< nbins;k++)
+		{
+			ppull[k]=((grpull->GetY()[k])-purity[k])/w2err[k];
+		    perrxl[k]=grpull->GetErrorXlow(k);
+		    perrxh[k]=grpull->GetErrorXhigh(k);
+			cout <<" grpull->GetY()[k] "<< grpull->GetY()[k] << " purity[k] " << purity[k] << " w2err[k] " << w2err[k] << " pull[k] " << ppull[k] << " errxl " <<perrxl[k] << " errxh" << perrxh[k] <<endl;
+		}
+    }
+	TString canname;
+	canname=Form("cpull_%s",(truthcheck)? "truth": "rcone_side");
+	TCanvas *cpull=new TCanvas(canname,canname);
 	cpull->Divide(2,1);
 	cpull->cd(1);
+
 	TPad *padpull = new TPad("padpull","",0,0,1,1);
 	padpull->Draw();
 	padpull->cd(); 
 	padpull->SetGridx();
 	padpull->SetGridy();
 	padpull->SetLogx();
-	  
-	TGraphAsymmErrors *grpm = new TGraphAsymmErrors(nbins,dpmass_all, pull);
+	 //TODO correct errors with error propagation for tgraph and th1 
+	TGraphAsymmErrors *grpm = new TGraphAsymmErrors(nbins,dpmass, ppull,perrxl, perrxh, w2err);
 //	grpm->SetTitle(Form("mgg %s",eta_q.Data()));
 	grpm->SetTitle("mgg EBEB");
 	grpm->SetMarkerStyle(20);
@@ -69,25 +80,27 @@ int plot_pull()
 	grpm->GetYaxis()->SetTitleOffset(1.2);
 	padpull->SetTicks(0,2);
 	grpm->Draw("AP");
-	
+
 	cpull->cd(2);
-	TPad *padpull2 = new TPad("padpull2","",0,0,1,1);
+	gStyle->SetOptFit(1);
+    TPad *padpull2 = new TPad("padpull2","",0,0,1,1);
 	padpull2->Draw();
+	padpull2->cd();
     TH1F* proj=new TH1F("proj","proj",nbins,-5.,5.);
     TF1 * g 	 =new TF1("g","gaus",-3.,3.);
     for(int i=0; i<=nbins;i++)
     {
-	   proj->Fill(pull[i]);
+	   proj->Fill(ppull[i]);
     }
 
    // proj->GetXaxis()->SetRangeUser(-5.,5.);
-	proj->Fit("g","R L");
+	proj->Fit("g","L R");
 	proj->Draw("");
 	g->Draw("SAME");
-//	cpull->Print(Form("../plots/March17/massbinned20/150317_truth_pull_EBEB_%u.root",nbins),"root");
-//	cpull->Print(Form("../plots/March17/massbinned20/150317_truth_pull_EBEB_%u.png",nbins),"png");
-	cpull->Print(Form("../plots/March17/massbinned20/150317_rcone_pull_EBEB_%u.root",nbins),"root");
-	cpull->Print(Form("../plots/March17/massbinned20/150317_rcone_pull_EBEB_%u.png",nbins),"png");
+//	cpull->Print(Form("../plots/March18/massbinned20/150318_truth_pull_EBEB_%u.root",nbins),"root");
+//	cpull->Print(Form("../plots/March18/massbinned20/150318_truth_pull_EBEB_%u.png",nbins),"png");
+	cpull->Print(Form("../plots/March18/massbinned20_4bins/150318_%s_pull_EBEB_%u.root",(truthcheck)? "truth": "rcone_side",nbins),"root");
+	cpull->Print(Form("../plots/March18/massbinned20_4bins/150318_%s_pull_EBEB_%u.png",(truthcheck)? "truth": "rcone_side",nbins),"png");
 	return 0;
 }
 //TODO etGGa_q definieren
@@ -95,13 +108,12 @@ int plot_pull()
 
 
 //main script
-
-int plot()
-{
+int plot (Bool_t truth=kFALSE);
+int plot(Bool_t truth )
+{	
 gROOT->Reset();
 gROOT->SetStyle("Plain"); // possibilities: Default, Plain, Bold, Video, Pub
 gStyle->SetOptStat(0);
-gStyle->SetOptFit(1);
 gStyle->SetOptTitle(0);
 gStyle->SetStatFont(63); 
 gStyle->SetStatFontSize(30); 
@@ -124,72 +136,75 @@ assert(fcp);
 TGraphAsymmErrors* grcp=(TGraphAsymmErrors*)fcp->Get("grEB");
 assert(grcp);
 // ************************read in mass bins and purity
-const char *path=Form("150317_truth_purity_sumw2erron_EBEB_massbin_20_range");
-const char *dir=Form("../plots/March17/massbinned20/");
-const char *dir2=Form("../plots/March16/massbinned20/");
+const char *path=Form("150318_truth_purity_sumw2erron_EBEB_massbin_20_range");
+const char *dir=Form("../plots/March18/massbinned20_4bins/");
+TGraphErrors* gr_n1=new TGraphErrors();
+TGraphErrors* gr_n2=new TGraphErrors();
+//const char *dir2=Form("../plots/March16/massbinned20/");
+int	nbins1=0;
+int	nbins2=0;
 //*********************************truthfit***********************************//
-f1=new TFile(Form("%s%s_0_12.root",dir,path),"READ");
+
+//TODO make more flexible for 100 bins 
+f1=new TFile(Form("%s%s_0_11.root",dir,path),"READ");
 assert(f1);
 TGraphErrors* gr1=(TGraphErrors*)f1->Get("Graph");
 assert(gr1); 
-const int	nbins1=gr1->GetN();
-cout << "nbins1 " << nbins1<<endl;
 
 f2=new TFile(Form("%s%s_10_21.root",dir,path),"READ");
 assert(f2);
 TGraphErrors* gr2=(TGraphErrors*)f2->Get("Graph");
 assert(gr2);
-//TODO for Pull get tgraph with sumw2 error on, but only if ready and not over canvas anymore
-const int	nbins2=gr2->GetN();
-cout << "nbins2 " << nbins2<<endl;
-
+if(truth)
+{
+	gr_n1=gr1;
+	gr_n2=gr2;
+	nbins1=(gr1->GetN())-1;
+	nbins2=(gr2->GetN())-1;
+	cout << "nbins1 truth " << nbins1<< "nbins2 truth" << nbins2<<endl;
+}
 //*************************rcone and sideband *********************************//
-const char *path2=Form("150316_rcone_sideb_purity_sumw2erron_EBEB_massbin_20_range");
-f3=new TFile(Form("%s%s_0_11.root",dir2,path2),"READ");
+const char *path2=Form("150318_rcone_sideb_purity_sumw2erron_EBEB_massbin_20_range");
+f3=new TFile(Form("%s%s_0_11.root",dir,path2),"READ");
 assert(f3);
 TGraphErrors* gr3=(TGraphErrors*)f3->Get("Graph");
 assert(gr3);
 
-f4=new TFile(Form("%s%s_10_21.root",dir2,path2),"READ");
+f4=new TFile(Form("%s%s_10_21.root",dir,path2),"READ");
 assert(f4);
 TGraphErrors* gr4=(TGraphErrors*)f4->Get("Graph");
 assert(gr4);
-
-//TODO build new array with all dpmass and purity from variable arrays from tgrapherrors after each other
-//int end1=11;
-//
-//for(int k=0;k<nbins1; k++ )
-/*
-for(int k=0;k<nbins1-1; k++ )
+if(!truth)
 {
-	gr1->GetPoint(k,dpmass_all[k],purity_all[k]);
-	w2err_all[k]=gr1->GetErrorY(k);
-	cout << "k " << k << "dpmass " << dpmass_all[k] << "purity " << purity_all[k] << "w2err_all[k] " << w2err_all[k] <<endl;
+	gr_n1=gr3;
+	gr_n2=gr4;
+	nbins1=(gr2->GetN())-1;
+	nbins2=(gr3->GetN())-1;
+	cout << "nbins1 rcone sideband " << nbins1<< "nbins2" << nbins2<<endl;
+}
+
+nbins=nbins1+nbins2;
+//Double_t dpmass_all[nbins];
+//Double_t purity_all[nbins];
+//Double_t w2err_all[nbins];
+double *pdpmass_all=new double[nbins];
+double *ppurity_all=new double[nbins];
+double *pw2err_all=new double[nbins];
+for(int k=0;k<nbins1; k++ )
+{
+	gr_n1->GetPoint(k,pdpmass_all[k],ppurity_all[k]);
+	pw2err_all[k]=gr_n1->GetErrorY(k);
+	cout << "k " << k << "dpmass " << pdpmass_all[k] << "purity " << ppurity_all[k] << "w2err_all[k] " << pw2err_all[k] <<endl;
 }
 
 cout << "second filling " << endl;
-for(int k=1;k<nbins2-1; k++ )
+for(int k=0;k<nbins2; k++ )
 {
-	gr2->GetPoint(k,dpmass_all[k+nbins1-2],purity_all[k+nbins1-2]);
-	w2err_all[k+nbins1-2]=gr2->GetErrorY(k);
-	cout << "k " << k+nbins1-2 << "dpmass " << dpmass_all[k+nbins1-2] <<  "purity " << purity_all[k+nbins1-2] << "w2err_all[k] " << w2err_all[k+nbins1-2] <<endl;
+	gr_n2->GetPoint(k,pdpmass_all[k+nbins1],ppurity_all[k+nbins1]);
+	pw2err_all[k+nbins1]=gr4->GetErrorY(k);
+	cout << "k " << k+nbins1 << "dpmass " << pdpmass_all[k+nbins1] <<  "purity " << ppurity_all[k+nbins1] << "w2err_all[k] " << pw2err_all[k+nbins1] <<endl;
 } 
-*/
 
-for(int k=0;k<nbins1-2; k++ )
-{
-	gr3->GetPoint(k+1,dpmass_all[k],purity_all[k]);
-	w2err_all[k]=gr3->GetErrorY(k+1);
-	cout << "k " << k << "dpmass " << dpmass_all[k] << "purity " << purity_all[k] << "w2err_all[k] " << w2err_all[k] <<endl;
-}
-
-cout << "second filling " << endl;
-for(int k=1;k<nbins2; k++ )
-{
-	gr4->GetPoint(k,dpmass_all[k+nbins1-3],purity_all[k+nbins1-3]);
-	w2err_all[k+nbins1-3]=gr4->GetErrorY(k);
-	cout << "k " << k+nbins1-3 << "dpmass " << dpmass_all[k+nbins1-3] <<  "purity " << purity_all[k+nbins1-3] << "w2err_all[k] " << w2err_all[k+nbins1-3] <<endl;
-} 
 cres->cd();
 TPad *pad1 = new TPad("pad1","",0,0,1,1);
 pad1->Draw();
@@ -221,10 +236,11 @@ gr3->Draw("P");
 gr4->Draw("P");
 leg->Draw();
 pad1->SetTicks(0,2);
-cres->Print("../plots/March17/150317_purity_EBEB_truth_rconecomp.root","root");
-cres->Print("../plots/March17/150317_purity_EBEB_truth_rconecomp.png","png");
+cres->Print("../plots/March18/massbinned20_4bins/150318_purity_EBEB_truth_rconecomp.root","root");
+cres->Print("../plots/March18/massbinned20_4bins/150318_purity_EBEB_truth_rconecomp.png","png");
 
-plot_pull();
+plot_pull(pdpmass_all,ppurity_all,pw2err_all,truth);
+
 return 0;
 }
 

@@ -7,7 +7,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include "TFormula.h"
-#include <TH1F.h>
+#include <TH1D.h>
 #include "TString.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
@@ -17,17 +17,17 @@
 #include "TGraphAsymmErrors.h"
 #include "TVector3.h"
 using namespace std;
-//Float_t pixel_lumi= 19.7;
-Float_t pixel_lumi= 1.;
+Float_t pixel_lumi= 19.7;
+//Float_t pixel_lumi= 1.;
 bool areascaled=false;bool eff_calc=false;
 //bool doswap=false;
 TFile *f;TFile *f_h;
 TTree *tree;
-Float_t xbins[66];
+Double_t xbins[66];
 Long64_t nentries;
 int u=0;int v=0;int y=0;int w=0;
-TH1F* h_pvz; TH1F* h_h2ggvz; TH1F * h_allz;
-TH1F* h_pv;TH1F* h_h2ggv;TH1F* h_truth; TH1F* h_all; TH2F* h_eratio;TH1F* h_geniso;TH1F* h_genisotruth; TH1F* h_isowv;
+TH1D* h_pvz; TH1D* h_h2ggvz; TH1D * h_allz;
+TH1D* h_pv;TH1D* h_h2ggv;TH1D* h_truth; TH1D* h_all; TH2F* h_eratio;TH1D* h_geniso;TH1D* h_genisotruth; TH1D* h_isowv;
 
 
 void PrintProgress(Long64_t entry)
@@ -53,9 +53,9 @@ void light::Loop()
 {
 	if (fChain == 0) return;
 	randomgen = new TRandom3(0);
-  	TH1F::SetDefaultSumw2(kTRUE);
+  	TH1D::SetDefaultSumw2(kTRUE);
 	//variable binning
-	Float_t xstart=400.;
+	Double_t xstart=400.;
     nbins=66;
     xbins[0]=0.;
     for(int i=0 ; i <nbins ; i++)
@@ -75,58 +75,59 @@ void light::Loop()
 	else if(etarange=="fulletarange") {seta="fulletarange"; fulletarange=true;}
 	else {cout << "etarange not correct "<< endl;}
     cout << "doswap " << doswap << endl;
-	const char* fitfilename=Form("../forroofit/March18/%s%s_%s%s.root",(isdata) ? "data": "mc" ,(sel.Data()), (seta.Data()),(doswap) ? "_rev" : "");
+	const char* fitfilename=Form("../forroofit/April1/%s%s_%s%s.root",(isdata) ? "data": "mc" ,(sel.Data()), (seta.Data()),(doswap) ? "_rev" : "");
 //	const char* fitfilename=Form("test.root");
 	f = new TFile(fitfilename,"RECREATE");
 	cout << fitfilename << endl;
-	h_iso= new TH1F("h_iso","h_iso",90, 0.,9.);
-	h_geniso= new TH1F("h_geniso","h_geniso",2000, -1000.,1000.);
-	h_genisotruth= new TH1F("h_genisotruth","h_geniso",90, 0.,9.);
-	h_truth=new TH1F("h_truth","h_truth",2,0.,2.);
-	h_all=new TH1F("h_all","h_all",2,0.,2.);
-	h_pv=new TH1F("h_pv","h_pv",2,0.,2.);
-	h_h2ggv=new TH1F("h_h2ggv","h_h2ggv",2,0.,2.);
-	h_allz=new TH1F("h_allz","h_allz",2,0.,2.);
-	h_pvz=new TH1F("h_pvz","h_pvz",2,0.,2.);
-	h_h2ggvz=new TH1F("h_h2ggvz","h_h2ggvz",2,0.,2.);
-	h_isopv= new TH1F("h_isopv","h_isopv",90, 0.,9.);
-	h_sieie= new TH1F("h_sieie","h_sieie", 400, 0, 0.04);
-	h_isowv= new TH1F("h_isowv","h_isowv",90, 0.,9.);
-	h_isogen= new TH1F("h_isogen","h_isogen",90, 0.,9.);
-	h_pt= new TH1F("h_pt","h_pt", 200, 0., 400.);
-	h_diphopt= new TH1F("h_diphopt","h_diphopt",1000,0.,1000.);
-	h_h2ggv_diphopt= new TH1F("h_h2ggv_diphopt","h_h2ggv_diphopt",1000,0.,1000.);
+	h_iso= new TH1D("h_iso","h_iso",90, 0.,9.);
+	h_geniso= new TH1D("h_geniso","h_geniso",2000, -1000.,1000.);
+	h_genisotruth= new TH1D("h_genisotruth","h_geniso",90, 0.,9.);
+	h_truth=new TH1D("h_truth","h_truth",2,0.,2.);
+	h_all=new TH1D("h_all","h_all",2,0.,2.);
+	h_pv=new TH1D("h_pv","h_pv",2,0.,2.);
+	h_h2ggv=new TH1D("h_h2ggv","h_h2ggv",2,0.,2.);
+	h_allz=new TH1D("h_allz","h_allz",2,0.,2.);
+	h_pvz=new TH1D("h_pvz","h_pvz",2,0.,2.);
+	h_h2ggvz=new TH1D("h_h2ggvz","h_h2ggvz",2,0.,2.);
+	h_isopv= new TH1D("h_isopv","h_isopv",90, 0.,9.);
+	h_sieie= new TH1D("h_sieie","h_sieie", 400, 0, 0.04);
+	h_isowv= new TH1D("h_isowv","h_isowv",90, 0.,9.);
+	h_isogen= new TH1D("h_isogen","h_isogen",90, 0.,9.);
+	h_pt= new TH1D("h_pt","h_pt", 200, 0., 400.);
+	h_diphopt= new TH1D("h_diphopt","h_diphopt",1000,0.,1000.);
+	h_h2ggv_diphopt= new TH1D("h_h2ggv_diphopt","h_h2ggv_diphopt",1000,0.,1000.);
 	eff_h2ggv_diphopt= new TGraphAsymmErrors();
 	eff_pv_diphopt= new TGraphAsymmErrors();
-	h_pv_diphopt= new TH1F("h_pv_diphopt","h_pv_diphopt",1000,0.,1000.);
-	h_diphomass= new TH1F("h_diphomass","h_diphomass", nbins, xbins);
-	h_weight =new TH1F("h_weight","h_weight", 500, 0.,50.); 
+	h_pv_diphopt= new TH1D("h_pv_diphopt","h_pv_diphopt",1000,0.,1000.);
+	h_diphomass= new TH1D("h_diphomass","h_diphomass", nbins, xbins);
+	h_weight =new TH1D("h_weight","h_weight", 500, 0.,50.); 
     h_eratio=new TH2F("h_eratio","h_eratio",100, 0.,1.,2000,-1000.,1000.);
 	do2dstd=false;do2dff=false; do2dpp=false; do2d1side=false;do2dside=false;do1p1f=false; do2drcone=false;
+	do1f1p=false;
 	kSignal_l=-999;kElectron_l=-999; kSignal_t=-999;kElectron_t=-999;
 	
 	tree = new TTree("for_roofit","for_roofit");
-    tree->Branch("roovar1",&roovar1, "roovar1/F");
-	tree->Branch("roovar2",&roovar2, "roovar2/F");
+    tree->Branch("roovar1",&roovar1, "roovar1/D/g");
+	tree->Branch("roovar2",&roovar2, "roovar2/D/g");
 	tree->Branch("rootruth1",&rootruth1, "rootruth1/I");
     tree->Branch("rootruth2",&rootruth2, "rootruth2/I");
-	tree->Branch("rooisopv1",&rooisopv1, "rooisopv1/F");
-	tree->Branch("rooisopv2",&rooisopv2, "rooisopv2/F");
+	tree->Branch("rooisopv1",&rooisopv1, "rooisopv1/D/g");
+	tree->Branch("rooisopv2",&rooisopv2, "rooisopv2/D/g");
 
-	tree->Branch("rooisowv1",&rooisowv1, "rooisowv1/F");
-	tree->Branch("rooisowv2",&rooisowv2, "rooisowv2/F");
-	tree->Branch("rooeta1",&rooeta1, "rooeta1/F");
-	tree->Branch("rooeta2",&rooeta2, "rooeta2/F");
-	tree->Branch("roopt1",&roopt1, "roopt1/F");
-	tree->Branch("roopt2",&roopt2, "roopta2/F");
-	tree->Branch("roosieie1",&roosieie1, "roosieie1/F");
-	tree->Branch("roosieie2",&roosieie2, "roosieie2/F");
-	tree->Branch("roodiphopt",&roodiphopt, "roodiphopt/F");
-	tree->Branch("roodiphomass",&roodiphomass, "roodiphomass/F");
-	tree->Branch("roorho",&roorho, "roorho/F");
-	tree->Branch("roosigma",&roosigma, "roosigma/F");
-	tree->Branch("roonvtx",&roonvtx, "roonvtx/F");
-	tree->Branch("rooweight",&rooweight, "rooweight/F");
+	tree->Branch("rooisowv1",&rooisowv1, "rooisowv1/D/g");
+	tree->Branch("rooisowv2",&rooisowv2, "rooisowv2/D/g");
+	tree->Branch("rooeta1",&rooeta1, "rooeta1/D/g");
+	tree->Branch("rooeta2",&rooeta2, "rooeta2/D/g");
+	tree->Branch("roopt1",&roopt1, "roopt1/D/g");
+	tree->Branch("roopt2",&roopt2, "roopta2/D/g");
+	tree->Branch("roosieie1",&roosieie1, "roosieie1/D/g");
+	tree->Branch("roosieie2",&roosieie2, "roosieie2/D/g");
+	tree->Branch("roodiphopt",&roodiphopt, "roodiphopt/D/g");
+	tree->Branch("roodiphomass",&roodiphomass, "roodiphomass/D/g");
+	tree->Branch("roorho",&roorho, "roorho/D/g");
+	tree->Branch("roosigma",&roosigma, "roosigma/D/g");
+	tree->Branch("roonvtx",&roonvtx, "roonvtx/D/g");
+	tree->Branch("rooweight",&rooweight, "rooweight/D/g");
 
 	roovar1 = -999; 	roovar2 = -999;
 	rooisopv1= -999;	rooisopv2= -999;
@@ -142,13 +143,13 @@ void light::Loop()
 
 	int gen_code_l=-999.;int gen_code_t=-999.;float geniso_l=-999.;float geniso_t=-999.;
 	bool pv_match=false; bool h2ggv_match=false;
-	Float_t weight=-999.;
+	Double_t weight=-999.;
     
 	nentries = fChain->GetEntriesFast();
     cout << nentries << endl;
-
+    const char* chosen_sel=sel.Data();
+         cout << "chosen selection  " << sel.Data() << endl;
     Long64_t nbytes = 0, nb = 0;
-//    for (Long64_t jentry=0; jentry<20;jentry++)
     for (Long64_t jentry=0; jentry<nentries;jentry++)
    	{
 		  Long64_t ientry = LoadTree(jentry);
@@ -171,34 +172,31 @@ void light::Loop()
 			 geniso_l = pholead_GenPhotonIsoDR04;
 	//also valide for sherpa as all set to status 2
 			 if ((gen_code_l==1 || gen_code_l==2) && ((geniso_l<5.)&& (geniso_l >=0.))) {kSignal_l=1;}
-			 else if (gen_code_l==4) {kElectron_l=2; }
 			 else{kSignal_l=0;}
 			 gen_code_t = photrail_PhoMCmatchexitcode;
 			 geniso_t = photrail_GenPhotonIsoDR04;
-			 if ((photrail_PhoMCmatchexitcode==1 ||photrail_PhoMCmatchexitcode==2)&&(geniso_t<5.)&& (geniso_l >=0.)){kSignal_t=1;}
-			 else if (gen_code_t==4) {kElectron_t=2; }
+			 if ((photrail_PhoMCmatchexitcode==1 ||photrail_PhoMCmatchexitcode==2)&&((geniso_t<5.)&& (geniso_t >=0.))){kSignal_t=1;}
 			 else {kSignal_t=0;}
 			 rootruth1=kSignal_l; 
 			 rootruth2=kSignal_t;
-			// cout << "rootruth1 " << rootruth1 << "rootruth2 " << rootruth2 << endl;
 		 }
 
 //selection setting
 	     if(sel=="2dstd") do2dstd=true;
-		 else if((sel=="2dpp") && !isdata && (rootruth1==1 && rootruth2==1)) {do2dpp=true;} 
-         else if((sel=="1p1f") && !isdata && ((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1))){ do1p1f=true;}
-         else if((sel=="1f1p") && !isdata && ((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1))){ do1f1p=true;}
+		 else if((sel=="2dpp") && ((!isdata) && (rootruth1==1 && rootruth2==1))) {do2dpp=true;} 
+         else if((sel=="1p1f") && ((!isdata) && ((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1)))){ do1p1f=true;}
+         else if((sel=="1f1p") && ((!isdata) && ((rootruth1==1 && rootruth2==0)|| (rootruth1==0 && rootruth2==1)))){ do1f1p=true;}
 		 else if(sel=="2drcone") do2drcone=true;
 		 else if(sel=="2drconeside") do2drconeside=true;
 	     else if(sel=="2dside") do2dside=true;
 	     else if(sel=="2d1side") do2d1side=true;
-		 else if((sel=="2dff")&& !isdata &&(rootruth1==0 && rootruth2==0)){do2dff=true;}
-		 else {cout << "no selection " << endl;
-			 cout << "rootruth1 " << rootruth1 << "rootruth2 " << rootruth2 << endl;}
+		 else if((sel=="2dff")&& (!isdata) &&(rootruth1==0 && rootruth2==0)){do2dff=true;}
+		 else continue;
+
 		 if((do2d1side || do1f1p))
 		 {
 	//event_pass12whoissiglike==0 leading photon signal region, subleading sideban
-	//only for truth match for swaping -> all photons in signal band are in roovar1, all photons in sideband are in roovar2 
+	//only for truth match far swaping -> all photons in signal band are in roovar1, all photons in sideband are in roovar2 
 				 if(event_pass12whoissiglike==0) { doswap=true;}
 				 else if(event_pass12whoissiglike==1) { doswap=false;}
 		 }     
@@ -208,14 +206,14 @@ void light::Loop()
 				 if(event_pass12whoissiglike==0) { doswap=false;}
 			     else if(event_pass12whoissiglike==1) { doswap=true;}
 		 }     
-        else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone )
-	   	{
+    //    else if(do2dpp ||do2dstd ||do2dff||do2dside ||do2drcone )
+	  // 	{
 			//cout << "randomgen" << randomgen->Uniform(0.,1.) << "doswap " << doswap << endl; if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
-			double rand=randomgen->Uniform(0.,1.);
-	      	if(rand>0.5){ doswap=true;}
-			else if(rand<0.5){ doswap=false;}
+//			double rand=randomgen->Uniform(0.,1.);
+//	      	if(rand>0.5){ doswap=true;}
+//			else if(rand<0.5){ doswap=false;}
 //		cout << "rand" << rand << "doswap " << doswap << endl;
-        }
+       // }
 		   //	if((randomgen->Uniform(0.,1.)>0.5)) doswap=true;}
          	
 		 if(!doswap)
@@ -278,7 +276,7 @@ void light::Loop()
 		 }
 		 rooweight= weight; roorho=event_rho;roosigma=event_sigma;  roonvtx=event_nRecVtx;
 		 TLorentzVector pho1; TLorentzVector pho2;TLorentzVector dipho;   
-		 Float_t diphopt=0.;  Float_t diphomass=0;
+		 Double_t diphopt=0.;  Double_t diphomass=0;
 	//compute diphoton momentum      
 		 pho1.SetPtEtaPhiE(pholead_pt,pholead_eta,pholead_phi, pholead_energy);
 		 pho2.SetPtEtaPhiE(photrail_pt,photrail_eta,photrail_phi, photrail_energy);
@@ -328,16 +326,16 @@ void light::Loop()
 				else if(do2d1side || do1f1p ||do2drconeside ||do1p1f)
 				{
 				// to build 50 % of the original signal/rcone template here all true photons projected on axis 1
-					if((do1p1f || do2drconeside) && randomgen->Uniform(0.,1.)>0.5)
-					{
+            	//if((do1p1f || do2drconeside) && randomgen->Uniform(0.,1.)>0.5)
+				//	{
 			//		//to build 10% of the original signal/rcone template here all true photons projected on axis 1, this is why keep 0.9
 			//		if((do2drconeside || do1p1f) && randomgen->Uniform(0.,1.)>0.9)	{
 							tree->Fill();
-					}
-					else if ((do2d1side || do1f1p) && (!do2drconeside && !do1p1f) )
-					{
-						tree->Fill();
-					}
+				//	}
+				//	else if ((do2d1side || do1f1p) && (!do2drconeside && !do1p1f) )
+				//	{
+				//		tree->Fill();
+				//	}
 				    h_all->Fill(1.,weight);
    					h_iso->Fill(roovar1,weight);h_isopv->Fill(rooisopv1,weight);h_isowv->Fill(rooisowv1,weight);
 				}	 
@@ -349,16 +347,17 @@ void light::Loop()
 	pho2.Clear();
 	}
 //LOOP over events finished
-	cout << "  h_all->Integral()  " << h_all->Integral()  <<  endl;
-	cout << "h_h2ggv integral "  << h_h2ggv->Integral() << endl;
-	cout << "h2ggv eff " << h_h2ggv->Integral()/h_all->Integral() << endl;
-	cout << "h_pv integral " << h_pv->Integral() << endl;
-	cout << "pv  eff " << h_pv->Integral()/h_all->Integral() << endl;
-    cout << "______________________" << endl;
-	cout << "h2ggv eff phopt < 250 GeV " << h_h2ggvz->Integral()/h_allz->Integral() << endl;
-	cout << "pv  eff phopt < 250 GeV" << h_pvz->Integral()/h_allz->Integral() << endl;
+	cout << " weighted entries in tree " << h_diphomass->Integral()  <<  endl;
+	cout << "  h_all in loop ->Integral()  " << h_all->Integral()  <<  endl;
+//	cout << "h_h2ggv integral "  << h_h2ggv->Integral() << endl;
+//	cout << "h2ggv eff " << h_h2ggv->Integral()/h_all->Integral() << endl;
+//	cout << "h_pv integral " << h_pv->Integral() << endl;
+//	cout << "pv  eff " << h_pv->Integral()/h_all->Integral() << endl;
+  //  cout << "______________________" << endl;
+//	cout << "h2ggv eff phopt < 250 GeV " << h_h2ggvz->Integral()/h_allz->Integral() << endl;
+//	cout << "pv  eff phopt < 250 GeV" << h_pvz->Integral()/h_allz->Integral() << endl;
 //	  cout <<" # 2dstd selection " << u <<" # truth matching " << v <<endl; //"x " << x << "y " << y << endl;
-	cout <<" eff: #pvmatch true  " << u <<" pv match false " << w  <<" h2ggmatch true  " << v <<" h2gg match false " << y << endl; //"x " << x << "y " << y << endl;
+//	cout <<" eff: #pvmatch true  " << u <<" pv match false " << w  <<" h2ggmatch true  " << v <<" h2gg match false " << y << endl; //"x " << x << "y " << y << endl;
 
 	for(int bin=0; bin<nbins; bin++)
 	{ 

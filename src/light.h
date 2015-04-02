@@ -12,7 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <iostream>
-#include "TH1F.h"
+#include "TH1D.h"
 #include "TRandom3.h"
 #include "TEfficiency.h"
 #include "TGraphAsymmErrors.h"
@@ -350,14 +350,14 @@ public :
    TBranch        *b_jet_energy;   //!
 
    //own varialbles
-  TH1F *h_iso;TH1F* h_isopv;TH1F* h_isogen;
-  TH1F *h_sieie;
-  TH1F *h_pt;
-  TH1F *h_diphopt;
-  TH1F *h_pv_diphopt;
-  TH1F *h_diphomass;
-  TH1F *h_weight;
-  TH1F *h_h2ggv_diphopt;
+  TH1D *h_iso;TH1D* h_isopv;TH1D* h_isogen;
+  TH1D *h_sieie;
+  TH1D *h_pt;
+  TH1D *h_diphopt;
+  TH1D *h_pv_diphopt;
+  TH1D *h_diphomass;
+  TH1D *h_weight;
+  TH1D *h_h2ggv_diphopt;
  // TEfficiency* h_h2ggv_diphopt;
   TGraphAsymmErrors* eff_h2ggv_diphopt;
   TGraphAsymmErrors* eff_pv_diphopt;
@@ -372,39 +372,39 @@ public :
    Bool_t do2drcone;
    Bool_t do2drconeside;
    Bool_t isdata;
+   Bool_t doswap;
   TString realdata;
    TString etarange;
    Int_t kSignal_l;
    Int_t kElectron_l;
    Int_t kSignal_t;
    Int_t kElectron_t;
-   Float_t rooisopv1; Float_t rooisopv2;
-   Float_t roovar1;
-   Float_t rooisowv1; Float_t rooisowv2;
-   Float_t roovar2;
+   Double_t rooisopv1; Double_t rooisopv2;
+   Double_t roovar1;
+   Double_t rooisowv1; Double_t rooisowv2;
+   Double_t roovar2;
    Int_t rootruth1;
    Int_t rootruth2;
-   Float_t roopt1;
-   Float_t roopt2;
-   Float_t roosieie1;
-   Float_t roosieie2;
-   Float_t rooeta1;
-   Float_t rooeta2;
-   Float_t roodiphopt;
-   Float_t roodiphomass;
-   Float_t roorho;
-   Float_t roosigma;
-   Float_t roonvtx;
-   Float_t rooweight;
+   Double_t roopt1;
+   Double_t roopt2;
+   Double_t roosieie1;
+   Double_t roosieie2;
+   Double_t rooeta1;
+   Double_t rooeta2;
+   Double_t roodiphopt;
+   Double_t roodiphomass;
+   Double_t roorho;
+   Double_t roosigma;
+   Double_t roonvtx;
+   Double_t rooweight;
   Int_t nbins; 
   
  TRandom3 *randomgen;
  TString seta; TString name; TString sel;
  Bool_t EBEB;Bool_t m1EE;Bool_t EEEE;Bool_t fulletarange;
 
-
  
-   light(TString, TString,TString, TString,TString);
+   light(TString, TString,TString, TString,TString,Bool_t);
    virtual ~light();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -413,7 +413,6 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   
   
 };
 
@@ -421,7 +420,7 @@ public :
 
 
 #ifdef light_cxx
-light::light(TString filename, TString treename,TString _sel,TString _etarange, TString _realdata) : fChain(0) 
+light::light(TString filename, TString treename,TString _sel,TString _etarange, TString _realdata, Bool_t _doswap) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -435,11 +434,12 @@ TTree *tree;
       std::cout << treename << std::endl;
   // }
    Init(tree);
-  TH1F::SetDefaultSumw2(kTRUE);
+  TH1D::SetDefaultSumw2(kTRUE);
 inputtreename=treename;
 realdata=_realdata;
 etarange=_etarange;
 sel= _sel;
+doswap=_doswap;
 }
 
 light::~light()

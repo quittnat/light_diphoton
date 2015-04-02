@@ -12,7 +12,8 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <iostream>
-#include "TH1F.h"
+#include "TH1D.h"
+#include "TH1D.h"
 #include "TRandom3.h"
 #include "TEfficiency.h"
 #include "TGraphAsymmErrors.h"
@@ -350,14 +351,14 @@ public :
    TBranch        *b_jet_energy;   //!
 
    //own varialbles
-  TH1F *h_iso;TH1F* h_isopv;TH1F* h_isogen;
-  TH1F *h_sieie;
-  TH1F *h_pt;
-  TH1F *h_diphopt;
-  TH1F *h_pv_diphopt;
-  TH1F *h_diphomass;
-  TH1F *h_weight;
-  TH1F *h_h2ggv_diphopt;
+  TH1D *h_iso;TH1D* h_isopv;TH1D* h_isogen;
+  TH1D *h_sieie;
+  TH1D *h_pt;
+  TH1D *h_diphopt;
+  TH1D *h_pv_diphopt;
+  TH1D *h_diphomass;
+  TH1D *h_weight;
+  TH1D *h_h2ggv_diphopt;
  // TEfficiency* h_h2ggv_diphopt;
   TGraphAsymmErrors* eff_h2ggv_diphopt;
   TGraphAsymmErrors* eff_pv_diphopt;
@@ -435,7 +436,7 @@ TTree *tree;
       std::cout << treename << std::endl;
   // }
    Init(tree);
-  TH1F::SetDefaultSumw2(kTRUE);
+  TH1D::SetDefaultSumw2(kTRUE);
 inputtreename=treename;
 
 }

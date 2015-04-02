@@ -54,11 +54,18 @@
 #include "TLegend.h"
 #include "TSystem.h"
 #include "fit1d.h"
+#include <ctime> 
+#define DTTMFMT "%Y-%m-%d"
+#define DTTMSZ 11
 
 using namespace std; 
 using namespace RooFit;
 
-
+static char *getDtTm (char *buff) {
+	   time_t t = time (0);
+	   strftime (buff, DTTMSZ, DTTMFMT, localtime (&t));
+	   return buff;
+}
 //check how much memory the jobs use, 4 GB normal
  void print_mem(){
 	 gSystem->GetProcInfo(&procinfo);
@@ -76,7 +83,7 @@ int quantiles(TH1F* mass,double probtemp[], double dpmqtemp[] ) {
         
 		//first entry e.g. 0.05 - diphopt 73 to end up with 10 bins in the end	
 	    probtemp[i] =  Float_t(i+startbin_q)/ntot_q;
-        mass->GetQuantiles(nq_q,dpmqtemp,probtemp);
+        mass->GetQuantiles(nq_q+1,dpmqtemp,probtemp);
 		cout << "quantile  "<<probtemp[i] << " diphopt  " << dpmqtemp[i]  << endl;
 		}
         //show the original histogram in the top pad
@@ -94,8 +101,8 @@ int quantiles(TH1F* mass,double probtemp[], double dpmqtemp[] ) {
 			TGraph *gr = new TGraph(nq_q,probtemp,dpmqtemp);
 			gr->SetMarkerStyle(21);
 			gr->Draw("alp");
-			cq->SaveAs(Form("../plots/March18/massbinned20_4bins/massquantiles_%s_range_%u_%u_%s.root",(truthfit)? "truth": "rcone_sideb",startbin_q,endbin_q,eta_q.Data()));
-			cq->SaveAs(Form("../plots/March18/massbinned20_4bins/massquantiles_%s_range_%u_%u_%s.png",(truthfit)? "truth": "rcone_sideb",startbin_q,endbin_q,eta_q.Data()));
+			cq->SaveAs(Form("%smassquantiles_%s_range_%u_%u_%s.root",dir.Data(),(truthfit)? "truth": "rcone_sideb",startbin_q,endbin_q,eta_q.Data()));
+			cq->SaveAs(Form("%smassquantiles_%s_range_%u_%u_%s.png",dir.Data(),(truthfit)? "truth": "rcone_sideb",startbin_q,endbin_q,eta_q.Data()));
 //		}
 //   	
 	delete cq;
@@ -105,21 +112,14 @@ int quantiles(TH1F* mass,double probtemp[], double dpmqtemp[] ) {
 
 //final purity plot vs diphoton mass bins
 //TODO plot as bin on the x-axis, not as marker point
-int plot_purity_massbin(double mass[], double masserr[],double pur[],double purerr[],bool berr)  {
+int plot_purity_massbin(double mass[], double masserr[],double pur[],double purerr[],double purerrLo[],double purerrHi[],bool berr)  {
 	TCanvas* cgr =new TCanvas("cgr","cgr");
  	TLegend* leg = new TLegend(0.6,0.7,0.7,0.8);
    	leg->SetFillColor(10);
     leg->SetLineColor(10);
     leg->SetTextSize(0.03);
     leg->SetTextFont(42);
-	
-    //for(int i=0;i< nq;i++) {
-//		mass
-//	}
-
-	TGraphErrors *gr = new TGraphErrors(nq_q,mass, pur,masserr,purerr);
- //	TGraphAsymmErrors *gr = new TGraphAsymmErrors(nq_q,mass, pur,masserrl,masserrr,purerr,purerr);
-//	cgr->SetLogx();
+    TGraphAsymmErrors *gr = new TGraphAsymmErrors(nq_q,mass, pur,masserr,masserr,purerrLo,purerrHi);
 	cgr->SetGridy();
 	gr->SetTitle(Form("mgg %s",eta_q.Data()));
 	gr->SetMarkerStyle(20);
@@ -131,8 +131,8 @@ int plot_purity_massbin(double mass[], double masserr[],double pur[],double pure
     leg->AddEntry(gr,"template fit purity ","p");    
     gr->Draw("AP");
     leg->Draw();
-    gr->SaveAs(Form("../plots/March18/massbinned20_4bins/150318_%s_purity_%s_%s_massbin_%u_range_%u_%u.root",(truthfit) ? "truth": "rcone_sideb",(berr)? "sumw2erron": "sumw2erroff",eta_q.Data(),ntot_q,startbin_q,endbin_q));
-    cgr->Print(Form("../plots/March18/massbinned20_4bins/150318_%s_purity_%s_%s_massbin_%u_range_%u_%u.png",(truthfit) ? "truth": "rcone_sideb",(berr)? "sumw2erron": "sumw2erroff",eta_q.Data(),ntot_q,startbin_q,endbin_q),"png");
+    gr->SaveAs(Form("%spurity_%s_%s_%s_%s_massbin_%u_range_%u_%u.root",dir.Data(),date.Data(),(truthfit) ? "truth": "rcone_sideb",(berr)? "sumw2erron": "sumw2erroff",eta_q.Data(),ntot_q,startbin_q,endbin_q));
+    cgr->Print(Form("%spurity_%s_%s_%s_%s_massbin_%u_range_%u_%u.png",dir.Data(),date.Data(),(truthfit) ? "truth": "rcone_sideb",(berr)? "sumw2erron": "sumw2erroff",eta_q.Data(),ntot_q,startbin_q,endbin_q),"png");
     
 	delete cgr;
 	delete leg;
@@ -152,24 +152,24 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
   t->SetBranchStatus("*",0);
 
 
-  float v_rooisopv1;
-  float v_rooisopv2;
-  float v_rooisowv1;
-  float v_rooisowv2;
-  float v_roovar1;
-  float v_roovar2;
-  float v_roopt1;
-  float v_roosieie1;
-  float v_rooeta1;
-  float v_roopt2;
-  float v_roosieie2;
-  float v_rooeta2;
-  float v_roodiphopt;
-  float v_roodiphomass;
-  float v_roorho;
-  float v_roosigma;
-  float v_roonvtx;
-  float v_rooweight;
+  double v_rooisopv1;
+  double v_rooisopv2;
+  double v_rooisowv1;
+  double v_rooisowv2;
+  double v_roovar1;
+  double v_roovar2;
+  double v_roopt1;
+  double v_roosieie1;
+  double v_rooeta1;
+  double v_roopt2;
+  double v_roosieie2;
+  double v_rooeta2;
+  double v_roodiphopt;
+  double v_roodiphomass;
+  double v_roorho;
+  double v_roosigma;
+  double v_roonvtx;
+  double v_rooweight;
 
   TBranch *b_roovar1;
   TBranch *b_roovar2;
@@ -191,7 +191,7 @@ void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &ro
   TBranch *b_rooweight;
 
   const int nvars = 18;
-  float* ptrs[nvars]={&v_roovar1,&v_roovar2,&v_rooisopv1,&v_rooisopv2,&v_rooisowv1,&v_rooisowv2,&v_roopt1,&v_roosieie1,&v_rooeta1,&v_roopt2,&v_roosieie2,&v_rooeta2,&v_roodiphopt,&v_roodiphomass,&v_roorho,&v_roosigma,&v_roonvtx,&v_rooweight};
+  double* ptrs[nvars]={&v_roovar1,&v_roovar2,&v_rooisopv1,&v_rooisopv2,&v_rooisowv1,&v_rooisowv2,&v_roopt1,&v_roosieie1,&v_rooeta1,&v_roopt2,&v_roosieie2,&v_rooeta2,&v_roodiphopt,&v_roodiphomass,&v_roorho,&v_roosigma,&v_roonvtx,&v_rooweight};
   TBranch** branches[nvars]={&b_roovar1,&b_roovar2,&b_rooisopv1,&b_rooisopv2,&b_rooisowv1,&b_rooisowv2,&b_roopt1,&b_roosieie1,&b_rooeta1,&b_roopt2,&b_roosieie2,&b_rooeta2,&b_roodiphopt,&b_roodiphomass,&b_roorho,&b_roosigma,&b_roonvtx,&b_rooweight};
   RooRealVar* rooptrs[nvars]={roovar1,roovar2,rooisopv1,rooisopv2,rooisowv1,rooisowv2,roopt1,roosieie1,rooeta1,roopt2,roosieie2,rooeta2,roodiphopt,roodiphomass,roorho,roosigma,roonvtx,rooweight};
   bool status[nvars];
@@ -250,10 +250,10 @@ void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F
   newdset->reset();
   for (int i=0; i<(*dset)->numEntries(); i++){
     RooArgSet args = *((*dset)->get(i));
-    float oldw = (*dset)->store()->weight(i);
-    float rho = args.getRealValue("roorho");
-    float sigma = args.getRealValue("roosigma");
-    float neww = oldw*h->GetBinContent(h->FindBin(rho,sigma));
+    double oldw = (*dset)->store()->weight(i);
+    double rho = args.getRealValue("roorho");
+    double sigma = args.getRealValue("roosigma");
+    double neww = oldw*h->GetBinContent(h->FindBin(rho,sigma));
 	//if(debug){
 		weight_rho->Fill(neww);
 		weight_rhoo->Fill(oldw);
@@ -309,9 +309,9 @@ void reweight_pt_1d(TH1F* weight_pt, TH1F* weight_pto,TH2F*weight_ptn,TH2F*weigh
   newdset->reset();
   for (int i=0; i<(*dset)->numEntries(); i++){
     RooArgSet args = *((*dset)->get(i));
-    float oldw = (*dset)->store()->weight(i);
-    float pt = args.getRealValue(ptname);
-    float neww = oldw*h->GetBinContent(h->FindBin(fabs(pt)));
+    double oldw = (*dset)->store()->weight(i);
+    double pt = args.getRealValue(ptname);
+    double neww = oldw*h->GetBinContent(h->FindBin(fabs(pt)));
   //  if(debug){
 		weight_pt->Fill(neww);	
 		weight_pto->Fill(oldw);
@@ -365,9 +365,9 @@ void reweight_diphotonpt_1d(TH1F*weight_diphopt,TH1F*weight_diphopto,TH2F*weight
   assert(newdset);
   for (int i=0; i<(*dset)->numEntries(); i++){
     RooArgSet args = *((*dset)->get(i));
-    float oldw = (*dset)->store()->weight(i);
-    float diphopt = fabs((*dset)->get(i)->getRealValue("roodiphopt"));
-    float neww = oldw*h->GetBinContent(h->FindBin(fabs(diphopt)));
+    double oldw = (*dset)->store()->weight(i);
+    double diphopt = fabs((*dset)->get(i)->getRealValue("roodiphopt"));
+    double neww = oldw*h->GetBinContent(h->FindBin(fabs(diphopt)));
     newdset->add(args,neww);
    // if(debug){
 		weight_diphopt->Fill(neww);
@@ -424,9 +424,9 @@ void reweight_eta_1d(TH1F* weight_eta,TH1F* weight_etao,TH2F*weight_etan,TH2F* w
   newdset->reset();
   for (int i=0; i<(*dset)->numEntries(); i++){
     RooArgSet args = *((*dset)->get(i));
-    float oldw = (*dset)->store()->weight(i);
-    float eta = args.getRealValue(etaname);
-    float neww = oldw*h->GetBinContent(h->FindBin(fabs(eta)));
+    double oldw = (*dset)->store()->weight(i);
+    double eta = args.getRealValue(etaname);
+    double neww = oldw*h->GetBinContent(h->FindBin(fabs(eta)));
   //  if(debug){ 
 		weight_eta->Fill(neww);	
 		weight_etao->Fill(oldw);
@@ -554,11 +554,13 @@ const char * ratio_out= Form("ratio of truth MC to data MC: %f",ratio);
 
 }
 /////////////////////////////////////////////////////////////////////
-int prep_dataset(TString eta,Bool_t truthf, int ntotbins, int startbin, int endbin){
+int prep_dataset(Bool_t isdata,TString eta,Bool_t truthf, int ntotbins, int startbin, int endbin){
  //template from MC truth or with random cone/sideband?
+  dir=Form("../plots/April1/%s/massbinned20_4bins_truthreweight/",eta.Data());
   truthfit=truthf;
   // EBEB or nEBEB
   eta_q=eta;
+  isdata_q=isdata;
   //startbin for massquantiles, important if massbins splitted in different jobs
   startbin_q=startbin;
   //endbin for massquantiles! loop starts with i=1 such that the [0] entry of array is 0 and not the diphoptbin of first quantile. Therefore endbin=#total bins (ntotbins) +1
@@ -570,15 +572,24 @@ int prep_dataset(TString eta,Bool_t truthf, int ntotbins, int startbin, int endb
   else cout << "wrong eta range " << endl;
   const Int_t nq=endbin-startbin;
   nq_q=nq;
+  char buff[DTTMSZ];
+  date=getDtTm(buff);
+  cout << getDtTm(buff)<< endl;
   cout << "ntot bins" << ntotbins << endl;
   cout << "massbins " << nq << " startbin " << startbin << " endbin " << endbin << endl;
   
 //100 mass bins 10-15 % statistics on the purity fit are sufficient
-Double_t prob[nq];  // position where to compute the quantiles in [0,1]
-Double_t dpmq[nq];  // array to contain the quantiles
+Double_t prob[nq+1];  // position where to compute the quantiles in [0,1]
+Double_t dpmq[nq+1];  // array to contain the quantiles
 Double_t purity[nq];  // array to contain the quantiles
 Double_t purityerr[nq];  // array to contain the quantiles
 Double_t pullerror[nq];  // array to contain the quantiles
+//double *pullerrorLo=new double[nq];
+//double *pullerrorHi=new double[nq];
+Double_t pullerrorLo[nq];  // array to contain the quantiles
+Double_t pullerrorHi[nq];  // array to contain the quantiles
+Double_t purityerrLo[nq];  // array to contain the quantiles
+Double_t purityerrHi[nq];  // array to contain the quantiles
 //Double_t masserror[nq];  // array to contain the quantiles
 
 gStyle->SetOptStat(111111);
@@ -592,21 +603,34 @@ gStyle->SetOptStat(111111);
    //tbins.addUniform(90,0,9) ;
    //6 bins for purity fit in different massbins
   if(massbinned){
- // 	tbins.addUniform(1, 0.,0.1);
-//  	tbins.addUniform(2, 0.1,2);
-//  	tbins.addUniform(3, 2,9);
-  	tbins.addUniform(1,0.,0.1);
- 	tbins.addUniform(1,0.1,1.);
-  	tbins.addUniform(2,1.,9.);
-  }
+  	tbins.addUniform(1, 0.,0.1);
+  	tbins.addUniform(1, 0.1,1);
+  	tbins.addUniform(1, 1,5);
+  	tbins.addUniform(1, 5,9);
+  //	tbins.addUniform(2, 0.1,2);
+ // 	tbins.addUniform(3, 2,9);
+ /* 	tbins.addUniform(1,0.,0.1);
+ 	tbins.addUniform(5,0.1,1.);
+  	tbins.addUniform(10,1.,3.);
+  	tbins.addUniform(10,3.,9.);
+ */
+   	}
+
   //only one diphoton mass-binning a bit finer
   if (!massbinned){
-    tbins.addUniform(5,0.,.5) ;
+/*    tbins.addUniform(5,0.,.5) ;
   	tbins.addUniform(3,0.5,1.) ;
   	tbins.addUniform(9,1.,3.) ;
 	tbins.addUniform(3,3.,6.) ;
 	tbins.addUniform(3,6.,9.);
-  } 
+  */
+//    tbins.addUniform(1,0.,.1) ;
+  //	tbins.addUniform(1,0.1,1.) ;
+ // 	tbins.addUniform(3,1.,9.) ;
+//	tbins.addUniform(1,0.,0.1) ;
+//	tbins.addUniform(3,6.,9.);
+   //tbins.addUniform(90,0,9) ;
+	} 
   roovar1->setBinning(tbins);
   roovar1->SetTitle("Iso_{1}");
   roovar2->SetTitle("Iso_{2}"); 
@@ -681,98 +705,126 @@ gStyle->SetOptStat(111111);
   assert (rooweight);
   TH1::SetDefaultSumw2(kTRUE);
   //Axis 1 and 2 randomly swapped
-  TFile* fdata=NULL; TFile* frcone=NULL; TFile * fsideband=NULL; TFile* testfile=NULL;
-  RooDataSet* dset_test=NULL;
-//  fdata = new TFile("../forroofit/Feb27/data.root","read"); 
-  fdata = new TFile("../forroofit/March09/data.root","read"); 
-  get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
-//both leading and subleading photon 
-  if(!truthfit){ 
-//  	frcone = new TFile("../forroofit/Feb27/rcone.root","read"); 	
-  	frcone = new TFile("../forroofit/March09/rcone.root","read"); 	
-  	get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
-  	//fsideband= new TFile("../forroofit/Feb27/sideband.root","read");
-  	fsideband= new TFile("../forroofit/March09/sideband.root","read");
-  	get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
-  	if(check) {	
-	testfile= new TFile("../forroofit/Feb27/sideband.root","read");
-		get_roodset_from_ttree(testfile,"for_roofit",dataset_test1);
-  	}
+  TFile* fdata=NULL; TFile* frcone=NULL; TFile * fsideband=NULL; TFile* testfilesig=NULL; TFile* testfilebkg=NULL;
+  if(isdata)
+  {
+	   fdata = new TFile("../forroofit/March30/data.root","read"); 
+	   get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
+	//both leading and subleading photon 
+  	   frcone = new TFile("../forroofit/March30/rconedata.root","read"); 	
+  	   get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
+  	   fsideband= new TFile("../forroofit/March30/sidebanddata.root","read");
+  	   get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
+  }		
+  if(!isdata)
+  {
+	  if(!truthfit)
+	  { 
+	    fdata = new TFile("../forroofit/April1/datamc.root","read"); 
+	    get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
+  		frcone = new TFile("../forroofit/April1/rconemc.root","read"); 	
+  		get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
+  		fsideband= new TFile("../forroofit/April1/sidebandmc.root","read");
+  		get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
+  		if(check) 
+		{	
+  			testfilesig= new TFile("../forroofit/April1/sig.root","read");
+			get_roodset_from_ttree(testfilesig,"for_roofit",dataset_test1);
+  			testfilebkg= new TFile("../forroofit/April1/bkg.root","read");
+			get_roodset_from_ttree(testfilebkg,"for_roofit",dataset_test2);
+  		}
+ 	 }
+	 if(truthfit)
+	 { 
+ 	//   fdata = new TFile("../forroofit/March30/sumbkgsig.root","read"); 
+ 	   fdata = new TFile("../forroofit/April1/datamc.root","read"); 
+	   get_roodset_from_ttree(fdata,"for_roofit",dataset_data);
+ // 		frcone = new TFile("../forroofit/March09/sig.root","read"); 	
+  		frcone = new TFile("../forroofit/April1/sig.root","read"); 	
+  		get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
+    // 	fsideband= new TFile("../forroofit/March09/bkg.root","read");
+    	fsideband= new TFile("../forroofit/April1/bkg.root","read");
+  		get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
+	  	if(check) {	
+  			testfilesig= new TFile("../forroofit/April1/sig.root","read");
+			get_roodset_from_ttree(testfilesig,"for_roofit",dataset_test1);
+  			testfilebkg= new TFile("../forroofit/April1/bkg.root","read");
+			get_roodset_from_ttree(testfilebkg,"for_roofit",dataset_test2);
+			assert(testfilesig);assert(testfilebkg);
+	  	}
+    }
   }
-  if(truthfit){ 
- // 	frcone = new TFile("../forroofit/Feb27/sig.root","read"); 	
-  	frcone = new TFile("../forroofit/March09/sig.root","read"); 	
-  	get_roodset_from_ttree(frcone,"for_roofit",dataset_rcone);
-  //	fsideband= new TFile("../forroofit/Feb27/bkg.root","read");
-    fsideband= new TFile("../forroofit/March09/bkg.root","read");
-  	get_roodset_from_ttree(fsideband,"for_roofit",dataset_sideband);
-  	if(check) {	
-  		testfile= new TFile("../forroofit/Feb27/bkg.root","read");
-		get_roodset_from_ttree(testfile,"for_roofit",dataset_test1);
-  	}
-   }
    assert(fdata); assert(frcone);  assert(fsideband);
   
 
+   	cout << "Entries truth/data weighted " << dataset_rcone->sumEntries()/ dataset_data->sumEntries()  << endl;
 
 
 //define mass bins
   TH1F* diphomass_data=(TH1F*)fdata->Get("h_diphomass") ;
   assert(diphomass_data);
-  quantiles(diphomass_data,prob,dpmq); 
-  TString cut_string; 
+  if(massbinned)
+  {
+  	quantiles(diphomass_data,prob,dpmq); 
+  }
+	TString cut_string; 
   if(!EBEB){
-   	cut_string= Form("roovar1<%f && (rooeta1 > 1.5 || rooeta2 > 1.5)",rightrange-1e-5);
+   	cut_string= Form("(roovar1<%f && roovar2<%f)  && (rooeta1 > 1.566 || rooeta2 > 1.566)",rightrange-1e-5, rightrange-1e-5);
   }
   else if(EBEB){
-	cut_string= Form("roovar1<%f && (rooeta1<1.5 && rooeta2 < 1.5)",rightrange-1e-5);
+	cut_string= Form(" (roovar1<%f && roovar2<%f) && (rooeta1<1.4442 && rooeta2 < 1.4442)",rightrange-1e-5,rightrange-1e-5);
+//	cut_string= Form(" (roovar1<%f && roovar2<%f)",rightrange-1e-5,rightrange-1e-5);
   }
+  
   if (dataset_data) dset_data = (RooDataSet*)(dataset_data->reduce(Name("dset_data"),Cut(cut_string)));
   if (dataset_rcone) dset_rcone = (RooDataSet*)(dataset_rcone->reduce(Name("dset_rcone"),Cut(cut_string)));
   if (dataset_sideband) dset_sideb = (RooDataSet*)(dataset_sideband->reduce(Name("dset_sideb"),Cut(cut_string)));
-  if (dataset_test1) dataset_test = (RooDataSet*)(dataset_test1->reduce(Name("dataset_test"),Cut(cut_string)));
+  if (dataset_test1) dataset_testsig = (RooDataSet*)(dataset_test1->reduce(Name("dataset_testsig"),Cut(cut_string)));
+  if (dataset_test2) dataset_testbkg = (RooDataSet*)(dataset_test2->reduce(Name("dataset_testbkg"),Cut(cut_string)));
 ////create subset of dataset e.g. for 1d signal template, here leading photon 
   RooDataSet *dset_data_allm_axis1 = (RooDataSet*)(dset_data->reduce(Name("dset_data_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*rooeta1,*roosieie1,*roodiphopt,*roodiphomass,*roorho,*roosigma))));
   RooDataSet *  dset_rcone_allm_axis1 = (RooDataSet*)(dset_rcone->reduce(Name("dset_rcone_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roodiphopt,*roodiphomass,*roorho,*roosigma))));
   RooDataSet *  dset_sideb_allm_axis1 = (RooDataSet*)(dset_sideb->reduce(Name("dset_sideb_allm_axis1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
-  assert(dset_data_allm_axis1);assert(dset_rcone_allm_axis1);assert(dset_sideb_allm_axis1); 
-
   
+////create subset of dataset e.g. for 1d signal template, here leading photon 
+	dset_data_allm_axis1->Print();
+	dset_rcone_allm_axis1->Print();
+	dset_sideb_allm_axis1->Print();
+   	cout << "ratio after eta and overflow cut Entries truth/data weighted " << dset_rcone_allm_axis1->sumEntries()/ dset_data_allm_axis1->sumEntries()  << endl;
 
  //compare two distributions, e.g. bkg and sideband
 if(check) { 
-	  dset_test = (RooDataSet*)(dataset_test->reduce(Name("dset_test"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
-
-	  RooDataHist *test_side = new RooDataHist("test_side","test_side",RooArgSet(*roovar1));
-	  test_side->add(*dset_sideb_allm_axis1);
-//	  test_side->add(*dset_rcone_allm_axis1);
-	  RooDataHist *test_bkg = new RooDataHist("test_bkg","test_bkg",RooArgSet(*roovar1));
-	  test_bkg->add(*dset_test);
-	  RooHistPdf *test_sidepdf = new RooHistPdf("test_sidepdf","test_sidepdf",RooArgList(*roovar1),*test_side);
-	  RooHistPdf *test_bkgpdf = new RooHistPdf("test_bkgpdf","test_bkgpdf",RooArgList(*roovar1),*test_bkg);
-	  
-//	  TCanvas *c3=new TCanvas("c3","isolation comparison");
+	  dset_testbkg1 = (RooDataSet*)(dataset_testbkg->reduce(Name("dset_testbkg1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
+	  dset_testsig1 = (RooDataSet*)(dataset_testsig->reduce(Name("dset_testsig1"),SelectVars(RooArgList(*roovar1,*rooisopv1,*roopt1,*roosieie1,*rooeta1,*roorho,*roodiphopt,*roodiphomass,*roosigma))));
+	  Double_t erc=0; Double_t esi=0; Double_t ebg=0;  Double_t esb=0;
+      erc=dset_rcone_allm_axis1->sumEntries(); 
+      esi=dset_testsig1->sumEntries(); 
+	  esb=dset_sideb_allm_axis1->sumEntries(); 
+      ebg=dset_testbkg1->sumEntries(); 
 	  TCanvas *c3=new TCanvas("c3","isolation comparison");
 	  c3->cd();
-	  c3->cd();
 	  c3->SetLogy();
-	//  RooPlot *testp = roovar1->frame(Title("sideband bkg comparison before reweighting"));
-	  RooPlot *testp = roovar1->frame(Title("sig comparison before reweighting"));
-//	  test_sidepdf->plotOn(testp,LineStyle(kDashed),LineColor(kRed),Name("sideband"));
-//	  test_bkgpdf->plotOn(testp,LineStyle(kDashed),LineColor(kBlack),Name("bkg"));
-	  test_sidepdf->plotOn(testp,LineStyle(kDashed),LineColor(kRed),Name("sig new"));
-	  test_bkgpdf->plotOn(testp,LineStyle(kDashed),LineColor(kBlack),Name("sig old"));
+	  TLegend *leg3 = new TLegend(0.6,0.8,0.9,0.9);
+	  leg3->SetFillColor(kWhite); 
+	  RooPlot *testp = roovar1->frame(Title("comparison before reweighting"));
+      dset_rcone_allm_axis1->plotOn(testp,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("rcone"));
+	  dset_testsig1->plotOn(testp,Rescale(erc/esi),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("sigtruth"));
+	  dset_sideb_allm_axis1->plotOn(testp,Rescale(erc/esb),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("sideband"));
+	  dset_testbkg1->plotOn(testp,Rescale(erc/ebg),Binning(tbins),MarkerStyle(20),MarkerColor(kMagenta),LineColor(kMagenta),Name("bkgtruth"));
+	  //test_sidepdf->plotOn(testp,LineStyle(kDashed),LineColor(kRed),Name("sig new"));
+	 // test_bkgpdf->plotOn(testp,LineStyle(kDashed),LineColor(kBlack),Name("sig old"));
 	  testp->Draw(); 
-	  //c3->SaveAs("../plots/sideband_bkg_comparison_noreweight.root") ;
-//	  c3->SaveAs("../plots/sideband_bkg_comparison_noreweight.png") ;
-	  c3->SaveAs("../plots/side_comparison_noreweight.root") ;
-	  c3->SaveAs("../plots/side_comparison_noreweight.png") ;
+	  leg3->AddEntry("rcone","random cone","l");
+	  leg3->AddEntry("sigtruth","sig truth","l");
+	  leg3->AddEntry("bkgtruth","bkg truth","l");
+	  leg3->AddEntry("sideband","sideband","l");
+	  leg3->Draw();
+	  c3->SaveAs(Form("%stemplate_comparison_noreweight_%s_n%u_s%u.root",dir.Data(),eta_q.Data(),ntot_q,startbin_q)) ;
+	  c3->SaveAs(Form("%stemplate_comparison_noreweight_%s_n%u_s%u.png",dir.Data(),eta_q.Data(),ntot_q,startbin_q)) ;
   }
       Double_t dpmq2[nq];  
-      //Double_t masserrorl[nq];
       Double_t masserror[nq];
 	  
-      
 	  // ratioplot(dset_data_axis1, dset_rcone_axis1,kTRUE);
  if(massbinned){
 	   
@@ -785,57 +837,64 @@ if(check) {
     	RooDataSet *dset_massc = NULL;
     	RooDataSet *dset_sigmassc = NULL;
     	RooDataSet *dset_bkgmassc = NULL;
-		
-		cut_s= Form("dpmass>%f_dpmass<%f",dpmq[i-1],dpmq[i]);
+    	RooDataSet *dset_testsigmassc = NULL;
+    	RooDataSet *dset_testbkgmassc = NULL;
+		TString cut_s2;
+		cut_s2= Form("roodiphomass>%f && roodiphomass<%f",dpmq[i-1],dpmq[i]);
+		cut_s= Form("%1.0f_%2.0f",dpmq[i-1],dpmq[i]);
 	 	cout << cut_s << endl;
   
-		dset_massc = (RooDataSet*)(dset_data_allm_axis1->reduce(Name(Form("dset_massc%u_%u",i,startbin)),Cut(cut_s)));
-		dset_sigmassc = (RooDataSet*)(dset_rcone_allm_axis1->reduce(Name(Form("dset_sigmassc%u_%u",i,startbin)),Cut(cut_s)));
-		dset_bkgmassc = (RooDataSet*)(dset_sideb_allm_axis1->reduce(Name(Form("dset_bkgmassc%u_%u",i,startbin)),Cut(cut_s)));
-		do1dfit(dset_massc,dset_sigmassc,dset_bkgmassc,dset_rcone_temp,dset_sideb_temp,dset_test,i, purity, purityerr, pullerror);
+		dset_massc = (RooDataSet*)(dset_data_allm_axis1->reduce(Name(Form("dset_massc%u_%u",i,startbin)),Cut(cut_s2)));
+		dset_sigmassc = (RooDataSet*)(dset_rcone_allm_axis1->reduce(Name(Form("dset_sigmassc%u_%u",i,startbin)),Cut(cut_s2)));
+		dset_bkgmassc = (RooDataSet*)(dset_sideb_allm_axis1->reduce(Name(Form("dset_bkgmassc%u_%u",i,startbin)),Cut(cut_s2)));
+        if(!isdata && check)
+		{
+			dset_testsigmassc = (RooDataSet*)(dset_testsig1->reduce(Name(Form("dset_testsigmassc%u_%u",i,startbin)),Cut(cut_s2)));
+			dset_testbkgmassc = (RooDataSet*)(dset_testbkg1->reduce(Name(Form("dset_testbkgmassc%u_%u",i,startbin)),Cut(cut_s2)));
+		}
+		do1dfit(dset_massc,dset_sigmassc,dset_bkgmassc,dset_rcone_temp,dset_sideb_temp,dset_testsigmassc,dset_testbkgmassc,i, purity, purityerr,purityerrLo,purityerrHi, pullerror,pullerrorLo,pullerrorHi);
+		//do1dfit(dset_massc,dset_sigmassc,dset_bkgmassc,dset_sigmassc,dset_bkgmassc,dset_test,i, purity, purityerr,purityerrLo,purityerrHi, pullerror,pullerrorLo,pullerrorHi);
 		//masserror[i]=0.;
 	
 		cut_s.Clear();
+		cut_s2.Clear();
 		//dont want first 0 element
-		//dpmq2[i-1]     =dpmq2[i]-(dpmq[i]-dpmq[i-1])/2;
 		dpmq2[i-1]     =(dpmq[i]+dpmq[i-1])/2;
-	//	masserrorl[i]=dpmq2[i]-dpmq[i-1];
-	//	masserrorr[i]=dpmq[i]-dpmq2[i];
-     	masserror[i]=(dpmq[i]-dpmq[i-1])/2;
+     	masserror[i-1]=(dpmq[i]-dpmq[i-1])/2;
 
 		
 	 }
         
 //	 plot_purity_massbin(dpmq2,masserrorl,masserrorr,purity,purityerr, true) ; 
 //	 plot_purity_massbin(dpmq2,masserrorl,masserrorr,purity,pullerror,false) ; 
-	 plot_purity_massbin(dpmq2,masserror,purity,purityerr, true) ; 
-	 plot_purity_massbin(dpmq2,masserror,purity,pullerror,false) ; 
+	 plot_purity_massbin(dpmq2,masserror,purity,purityerr,purityerrLo,purityerrHi,false) ; 
+	 plot_purity_massbin(dpmq2,masserror,purity,pullerror,pullerrorLo,pullerrorHi, true) ; 
  }
  else{
 //no mass bining, one fit for all diphoton masses, just but high number a the end of title (10000)
    int i= 10000;
-   do1dfit(dset_data_allm_axis1,dset_rcone_allm_axis1,dset_sideb_allm_axis1,dset_rcone_allm_axis1,dset_sideb_allm_axis1,dset_test,i, purity, purityerr,pullerror);
+   do1dfit(dset_data_allm_axis1,dset_rcone_allm_axis1,dset_sideb_allm_axis1,dset_rcone_allm_axis1,dset_sideb_allm_axis1,dset_testsig1,dset_testbkg1,i, purity, purityerr,purityerrLo,purityerrHi,pullerror, pullerrorLo, pullerrorHi);
  }
    return 0;
     
 }
 
 
-int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dset_bkgcut,RooDataSet *dset_rcone_axis1,RooDataSet *dset_sideb_axis1,RooDataSet*dset_testbkg,int im, double pu[], double puerr[],double pullerr[]){
+int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dset_bkgcut,RooDataSet *dset_rcone_axis1,RooDataSet *dset_sideb_axis1,RooDataSet* dset_testsig,RooDataSet*dset_testbkg,int im, double pu[], double puerr[],double puerrLo[],double puerrHi[],double pullerr[],double pullerrLo[],double pullerrHi[])
+{
 //reweighting
 	cout << "massbin " << im << endl;
 	dset_data_axis1->Print();
 	dset_rcone_axis1->Print();
 	dset_sideb_axis1->Print();
-//	RooDataSet* dset_sigorg=NULL;
-//	RooDataSet* dset_bkgorg=NULL;
+   	cout << "ratio in massbin  truth/data weighted " << dset_rcone_axis1->sumEntries()/ dset_data_axis1->sumEntries()  << endl;
 	RooDataSet* dset_sigorg=(RooDataSet*)dset_rcone_axis1->Clone("dset_sigorg");
 	RooDataSet* dset_bkgorg=(RooDataSet*)dset_sideb_axis1->Clone("dset_bkgorg");
-	//RooDataSet* dset_bkgorg=new RooDataSet(*dset_sideb_axis1,"dset_bkgorg");
-//	dset_bkgorg=dset_sideb_axis1;
-	if(debug) dset_testbkg->Print();
-  // 	cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/ dset_data_axis1->sumEntries()  << endl;
-	   reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_rcone_axis1,dset_data_axis1); 
+	if(check) dset_testsig->Print();
+	if(check) dset_testbkg->Print();
+  
+	// 	cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/ dset_data_axis1->sumEntries()  << endl;
+	    reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_rcone_axis1,dset_data_axis1); 
 		reweight_rhosigma(w_rho,w_rhoo,w_rhon,w_rho2o,w_rhonr,w_rho2,w_sigman,w_sigma2o,w_sigmanr,w_sigma2,&dset_sideb_axis1,dset_data_axis1); 
 		reweight_eta_1d(w_etar,w_etaro,w_etarn,w_etar2o,w_etarnr,w_etar2,&dset_rcone_axis1,dset_data_axis1,1);
 		reweight_eta_1d(w_eta,w_etao,w_etan,w_eta2o,w_etanr,w_eta2,&dset_sideb_axis1,dset_data_axis1,1);
@@ -846,93 +905,104 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 		  reweight_diphotonpt_1d(w_diphoptr,w_diphoptro,w_diphoptrn,w_diphoptr2o,w_diphoptrnr,w_diphoptr2,&dset_rcone_axis1,dset_data_axis1); 
 		}
 		reweight_diphotonpt_1d(w_diphopt,w_diphopto,w_diphoptn,w_diphopt2o,w_diphoptnr,w_diphopt2,&dset_sideb_axis1,dset_data_axis1); 
-
-     if(check){
-	 	  reweight_rhosigma(w_rhor,w_rhoro,w_rhorn,w_rhor2o,w_rhornr,w_rhor2,w_sigmarn,w_sigmar2o,w_sigmarnr,w_sigmar2,&dset_testbkg,dset_data_axis1);  
-	 	  reweight_eta_1d(w_etar,w_etaro,w_etarn,w_etar2o,w_etarnr,w_etar2,&dset_testbkg,dset_data_axis1,1);
-		  reweight_pt_1d(w_ptr,w_ptro,w_ptrn,w_ptr2o,w_ptrnr,w_ptr2,&dset_testbkg,dset_data_axis1,1);
-		  reweight_diphotonpt_1d(w_diphoptr,w_diphoptro,w_diphoptrn,w_diphoptr2o,w_diphoptrnr,w_diphoptr2,&dset_testbkg,dset_data_axis1); 
-		  RooDataHist *test_side2 = new RooDataHist("test_side2","test_side2",RooArgSet(*roovar1));
-		  test_side2->add(*dset_sideb_axis1);
-		  RooDataHist *test_bkg2 = new RooDataHist("test_bkg2","test_bkg2",RooArgSet(*roovar1));
-		  test_bkg2->add(*dset_testbkg);
-		  RooHistPdf *test_sidepdf2 = new RooHistPdf("test_sidepdf2","test_sidepdf2",RooArgList(*roovar1),*test_side2);
-		  RooHistPdf *test_bkgpdf2 = new RooHistPdf("test_bkgpdf2","test_bkgpdf2",RooArgList(*roovar1),*test_bkg2);
+									
+	if(check) { 
+       
+		reweight_rhosigma(tw_rhor,tw_rhoro,tw_rhorn,tw_rhor2o,tw_rhornr,tw_rhor2,tw_sigmarn,tw_sigmar2o,tw_sigmarnr,tw_sigmar2,&dset_testbkg,dset_data_axis1);  
+	 	  reweight_eta_1d(tw_etar,tw_etaro,tw_etarn,tw_etar2o,tw_etarnr,tw_etar2,&dset_testbkg,dset_data_axis1,1);
+		  reweight_pt_1d(tw_ptr,tw_ptro,tw_ptrn,tw_ptr2o,tw_ptrnr,tw_ptr2,&dset_testbkg,dset_data_axis1,1);
+		  reweight_diphotonpt_1d(tw_diphoptr,tw_diphoptro,tw_diphoptrn,tw_diphoptr2o,tw_diphoptrnr,tw_diphoptr2,&dset_testbkg,dset_data_axis1); 
+	 	  reweight_rhosigma(tw_rhor,tw_rhoro,tw_rhorn,tw_rhor2o,tw_rhornr,tw_rhor2,tw_sigmarn,tw_sigmar2o,tw_sigmarnr,tw_sigmar2,&dset_testsig,dset_data_axis1);  
+	 	  reweight_eta_1d(tw_etar,tw_etaro,tw_etarn,tw_etar2o,tw_etarnr,tw_etar2,&dset_testsig,dset_data_axis1,1);
+		  reweight_pt_1d(tw_ptr,tw_ptro,tw_ptrn,tw_ptr2o,tw_ptrnr,tw_ptr2,&dset_testsig,dset_data_axis1,1);
+		  reweight_diphotonpt_1d(tw_diphoptr,tw_diphoptro,tw_diphoptrn,tw_diphoptr2o,tw_diphoptrnr,tw_diphoptr2,&dset_testsig,dset_data_axis1); 
+	
+		  Double_t erc=0; Double_t esi=0; Double_t ebg=0;  Double_t esb=0;
+			  erc=dset_rcone_axis1->sumEntries(); 
+			  esi=dset_testsig->sumEntries(); 
+			  esb=dset_sideb_axis1->sumEntries(); 
+			  ebg=dset_testbkg->sumEntries(); 
 		  TCanvas *c4=new TCanvas("c4","isolation comparison after reweighting");
 		  c4->cd();
 		  c4->SetLogy();
-		  RooPlot *testp2 = roovar1->frame(Title("sideband bkg comparison after reweighting"));
-		  test_sidepdf2->plotOn(testp2,LineStyle(kDashed),LineColor(kRed),Name("sideband"));
-		  test_bkgpdf2->plotOn(testp2,LineStyle(kDashed),LineColor(kBlack),Name("bkg"));
+		  TLegend *leg4 = new TLegend(0.6,0.8,0.9,0.9);
+		  leg4->SetFillColor(kWhite); 
+		  RooPlot *testp2 = roovar1->frame(Title("comparison after reweighting"));
+		  dset_sigcut->plotOn(testp2,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("rcone"));
+		  dset_testsig->plotOn(testp2,Rescale(erc/esi),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("sigtruth"));
+		  dset_bkgcut->plotOn(testp2,Rescale(erc/ebg),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("sideband"));
+		  dset_testbkg->plotOn(testp2,Rescale(erc/ebg),Binning(tbins),MarkerStyle(20),MarkerColor(kMagenta),LineColor(kMagenta),Name("bkgtruth"));
 		  testp2->Draw(); 
-	//	  c4->SaveAs("../plots/sideband_bkg_comparison_reweight.root") ;
-//		  c4->SaveAs("../plots/sideband_bkg_comparison_reweight.png") ;
-		  c4->SaveAs("../plots/sig_comparison_reweight.root") ;
-		  c4->SaveAs("../plots/sig_comparison_reweight.png") ;
-	 }
-		 //check distributions, the one over whole massspectrum, in massbin and after reweighting for signal template
+		  leg4->AddEntry("rcone","random cone of massbin","l");
+		  leg4->AddEntry("sigtruth","sig truth of massbin","l");
+		  leg4->AddEntry("bkgtruth","bkg truth of massbin","l");
+		  leg4->AddEntry("sideband","sideband of massbin","l");
+		  leg4->Draw();
+		  c4->SaveAs(Form("%stemplate_comparison_reweight_%s_%s_%u_%u.root",dir.Data(),(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im)) ;
+		  c4->SaveAs(Form("%stemplate_comparison_reweight_%s_%s_%u_%u.png",dir.Data(),(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im)) ;
+	}	 
+		  //check distributions, the one over whole massspectrum, in massbin and after reweighting for signal template
 		 
-	      Double_t sumentries=0; Double_t sumentries_cut=0; Double_t sumentries_rew=0; 
-	      sumentries=dset_sigorg->sumEntries(); 
-		  sumentries_cut=dset_sigcut->sumEntries(); 
-		  sumentries_rew=dset_rcone_axis1->sumEntries(); 
-		  cout << "sumentries " << sumentries << " sumentries_cut "  << sumentries_cut << " sumentries_rew " << sumentries_rew << endl;
-		  TCanvas *csig=new TCanvas("csig","signal template comparison");
-	      TLegend *leg1 = new TLegend(0.6,0.8,0.9,0.9);
-		  leg1->SetFillColor(kWhite); 
-		  csig->cd();
-		  RooPlot *sig = roovar1->frame(Title("signal template comparison"));
-		  dset_sigorg->plotOn(sig,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("sigall"));
-		  dset_sigcut->plotOn(sig,Rescale(sumentries/sumentries_cut),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("sigmassbin"));
-		  dset_rcone_axis1->plotOn(sig,Rescale(sumentries/sumentries_rew),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("sigrew"));
-		   
-		  sig->Draw();
-	  	  leg1->AddEntry("sigall","whole mass spectrum","l");
-	  	  leg1->AddEntry("sigmassbin","in massbin","l");
-	  	  leg1->AddEntry("sigrew","after reweight","l");
-		  leg1->Draw();
-		  TString titlesig;
-		  titlesig= Form("sigtemplate_%s_%s_sigtemplatecomp_%s_startb%u_%u",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
-	  	  csig->SaveAs(Form("../plots/March18/massbinned20_4bins/%s.root",titlesig.Data()));
-	  	  csig->SaveAs(Form("../plots/March18/massbinned20_4bins/%s.png",titlesig.Data())); 
-		  //compare the background template to check if binning correct
-	      Double_t sumentriesb=0; Double_t sumentries_cutb=0; Double_t sumentries_rewb=0; 
-	      sumentriesb=dset_bkgorg->sumEntries(); 
-		  sumentries_cutb=dset_bkgcut->sumEntries(); 
-		  sumentries_rewb=dset_sideb_axis1->sumEntries(); 
-		  cout << "sumentries bkg " << sumentriesb << " sumentries_cut bkg "  << sumentries_cutb << " sumentries_rew bkg" << sumentries_rewb << endl;
-		  TCanvas *cbkg=new TCanvas("cbkg","bkgnal template comparison");
-		  cbkg->cd();
-		  cbkg->SetLogy();
-		  RooPlot *bkg = roovar1->frame(Title("bkgnal template comparison"));
-		  dset_bkgorg->plotOn(bkg,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("bkgall"));
-		  dset_bkgcut->plotOn(bkg,Rescale(sumentriesb/sumentries_cutb),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("bkgmassbin"));
-		  dset_sideb_axis1->plotOn(bkg,Rescale(sumentriesb/sumentries_rewb),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("bkgrew"));
-		  bkg->Draw();
-		  leg1->Draw();
-	  	  TString titlebkg;
-		  titlebkg= Form("bkg_template_%s_%s_bkgtemplatecomp_%s_startb%u_%u",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
-	  	  cbkg->SaveAs(Form("../plots/March18/massbinned20_4bins/%s.root",titlebkg.Data()));
-	  	  cbkg->SaveAs(Form("../plots/March18/massbinned20_4bins/%s.png",titlebkg.Data()));
-         
-	   
-		  //  if(massbinned) {
-	    TCanvas * c_reweights=new TCanvas("c_reweights","c_reweights");
-		c_reweights->Divide(3,2);  c_reweights->cd(1); w_ptn->Draw("colz");
-		c_reweights->cd(2);  w_pt2o->Draw("colz");  c_reweights->cd(3);   w_ptnr->Draw("colz");
-	    c_reweights->cd(4);  w_pt2->Draw("colz"); c_reweights->cd(5);w_pt->Draw();
-		c_reweights->cd(6);   w_pto->Draw(); 
-		TString titlerew; 
-		titlerew= Form("../plots/March18/massbinned20_4bins/reweight_%s_%s_%s_startbin%u_%u",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
-	  	 c_reweights->SaveAs(Form("%s_ptbkg.root",titlerew.Data()));
-	  	 c_reweights->SaveAs(Form("%s_ptbkg.png",titlerew.Data()));
-		  
-		TCanvas * c_reweights2=new TCanvas("c_reweights2","c_reweights2");
-		c_reweights2->Divide(3,2); c_reweights2->cd(1);  w_diphoptn->Draw("colz");  c_reweights2->cd(2);    w_diphopt2o->Draw("colz");
-		c_reweights2->cd(3);    w_diphoptnr->Draw("colz");c_reweights2->cd(4);  w_diphopt2->Draw("colz");
-		c_reweights2->cd(5);w_diphopt->Draw();  c_reweights2->cd(6);    w_diphopto->Draw();
-	  	c_reweights2->SaveAs(Form("%s_diphoptbkg.root",titlerew.Data()));
-	  	c_reweights2->SaveAs(Form("%s_dphoptbkg.png",titlerew.Data()));
+			  Double_t sumentries=0; Double_t sumentries_cut=0; Double_t sumentries_rew=0; 
+			  sumentries=dset_sigorg->sumEntries(); 
+			  sumentries_cut=dset_sigcut->sumEntries(); 
+			  sumentries_rew=dset_rcone_axis1->sumEntries(); 
+			  cout << "sumentries " << sumentries << " sumentries_cut "  << sumentries_cut << " sumentries_rew " << sumentries_rew << endl;
+			  TCanvas *csig=new TCanvas("csig","signal template comparison");
+			  TLegend *leg1 = new TLegend(0.6,0.8,0.9,0.9);
+			  leg1->SetFillColor(kWhite); 
+			  csig->cd();
+			  RooPlot *sig = roovar1->frame(Title("signal template comparison"));
+			  dset_sigorg->plotOn(sig,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("sigall"));
+			  dset_sigcut->plotOn(sig,Rescale(sumentries/sumentries_cut),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("sigmassbin"));
+			  dset_rcone_axis1->plotOn(sig,Rescale(sumentries/sumentries_rew),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("sigrew"));
+			  sig->Draw();
+			  leg1->AddEntry("sigall","whole mass spectrum","l");
+			  leg1->AddEntry("sigmassbin","in massbin","l");
+			  leg1->AddEntry("sigrew","after reweight","l");
+			  leg1->Draw();
+			  TString titlesig;
+			  titlesig= Form("sigtemplate_%s_%s_sigtemplatecomp_%s_startb%u_%u",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
+			  //titlesig= Form("sigtemplate_%s_%s_sigtemplatecomp_startb%u_%u",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",startbin_q,im);
+			  csig->SaveAs(Form("%s%s.root",dir.Data(),titlesig.Data()));
+			  csig->SaveAs(Form("%s%s.png",dir.Data(),titlesig.Data())); 
+			  //compare the background template to check if binning correct
+			  Double_t sumentriesb=0; Double_t sumentries_cutb=0; Double_t sumentries_rewb=0; 
+			  sumentriesb=dset_bkgorg->sumEntries(); 
+			  sumentries_cutb=dset_bkgcut->sumEntries(); 
+			  sumentries_rewb=dset_sideb_axis1->sumEntries(); 
+			  cout << "sumentries bkg " << sumentriesb << " sumentries_cut bkg "  << sumentries_cutb << " sumentries_rew bkg" << sumentries_rewb << endl;
+			  TCanvas *cbkg=new TCanvas("cbkg","bkgnal template comparison");
+			  cbkg->cd();
+			  cbkg->SetLogy();
+			  RooPlot *bkg = roovar1->frame(Title("bkgnal template comparison"));
+			  dset_bkgorg->plotOn(bkg,Binning(tbins),MarkerStyle(20),MarkerColor(kBlack),LineColor(kBlack),Name("bkgall"));
+			  dset_bkgcut->plotOn(bkg,Rescale(sumentriesb/sumentries_cutb),Binning(tbins),MarkerStyle(20),MarkerColor(kBlue),LineColor(kBlue),Name("bkgmassbin"));
+			  dset_sideb_axis1->plotOn(bkg,Rescale(sumentriesb/sumentries_rewb),Binning(tbins),MarkerStyle(20),MarkerColor(kRed),LineColor(kRed),Name("bkgrew"));
+			  bkg->Draw();
+			  leg1->Draw();
+			  TString titlebkg;
+			  titlebkg= Form("bkg_template_%s_%s_bkgtemplatecomp_%s_startb%u_%u",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
+			  //titlebkg= Form("bkg_template_%s_%s_bkgtemplatecomp_startb%u_%u",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",startbin_q,im);
+			  cbkg->SaveAs(Form("%s%s.root",dir.Data(),titlebkg.Data()));
+			  cbkg->SaveAs(Form("%s%s.png",dir.Data(),titlebkg.Data()));
+			 
+			TCanvas * c_reweights=new TCanvas("c_reweights","c_reweights");
+			c_reweights->Divide(3,2);  c_reweights->cd(1); tw_ptn->Draw("colz");
+			c_reweights->cd(2);  w_pt2o->Draw("colz");  c_reweights->cd(3);   w_ptnr->Draw("colz");
+			c_reweights->cd(4);  w_pt2->Draw("colz"); c_reweights->cd(5);w_pt->Draw();
+			c_reweights->cd(6);   w_pto->Draw(); 
+			TString titlerew; 
+			titlerew= Form("%sreweight_%s_%s_%s_startbin%u_%u",dir.Data(),(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
+			 c_reweights->SaveAs(Form("%s_ptbkg.root",titlerew.Data()));
+			 c_reweights->SaveAs(Form("%s_ptbkg.png",titlerew.Data()));
+			  
+			TCanvas * c_reweights2=new TCanvas("c_reweights2","c_reweights2");
+			c_reweights2->Divide(3,2); c_reweights2->cd(1);  w_diphoptn->Draw("colz");  c_reweights2->cd(2);    w_diphopt2o->Draw("colz");
+			c_reweights2->cd(3);    w_diphoptnr->Draw("colz");c_reweights2->cd(4);  w_diphopt2->Draw("colz");
+			c_reweights2->cd(5);w_diphopt->Draw();  c_reweights2->cd(6);    w_diphopto->Draw();
+			c_reweights2->SaveAs(Form("%s_diphoptbkg.root",titlerew.Data()));
+			c_reweights2->SaveAs(Form("%s_dphoptbkg.png",titlerew.Data()));
 
 		 TCanvas * c_rhoreweights=new TCanvas("c_rhoreweights","c_rhoreweights");
 		  c_rhoreweights->Divide(3,2);  c_rhoreweights->cd(1);  w_rhon->Draw("colz");
@@ -992,7 +1062,7 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 		  w_eta->Draw();c_etareweightsr->cd(6);   w_etao->Draw(); 
 	  	  c_etareweightsr->SaveAs(Form("%s_etasig.root",titlerew.Data()));
 	    	c_etareweightsr->SaveAs(Form("%s_etasig.png",titlerew.Data()));
-  // }
+ 
   if(check) {
 	  cout << "after reweighting" << endl; 
 	  cout << "sig " << dset_rcone_axis1->sumEntries() << endl;
@@ -1002,29 +1072,17 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	  cout << "one? " << (dset_rcone_axis1->sumEntries()+ dset_sideb_axis1->sumEntries())/dset_data_axis1->sumEntries()<< endl;
 	  cout << "ratio Entries truth/data weighted " << dset_rcone_axis1->sumEntries()/dset_data_axis1->sumEntries()  << endl;
 	  }
-	  if(check){
-		 //debugging reweighting 
-		  RooDataHist *test_dpt = new RooDataHist("test_dpt","test_dpt",RooArgSet(*roodiphopt));
-		  test_dpt->add(*dset_data_axis1);
-		  RooDataHist *test_spt = new RooDataHist("test_spt","test_spt",RooArgSet(*roodiphopt));
-		  test_spt->add(*dset_sideb_axis1);
-		  RooHistPdf *test_datapt = new RooHistPdf("test_datapt","test_datapt",RooArgList(*roodiphopt),*test_dpt);
-		  RooHistPdf *test_sidept = new RooHistPdf("test_sidept","test_sidept",RooArgList(*roodiphopt),*test_spt);
-		  TCanvas *c3=new TCanvas("c3","diphopt after reweighting rho, eta , single pt");
-		  c3->cd();
-		  RooPlot *testpt = roodiphopt->frame(Title("diphopt after reweighting rho, eta , single pt"));
-		  test_datapt->plotOn(testpt,LineStyle(kDashed),LineColor(kRed),Name("data"));
-		  test_sidept->plotOn(testpt,LineStyle(kDashed),LineColor(kBlack),Name("sideband"));
-		  testpt->Draw(); 
-	   }
 //fitting
 	  cout << "fitting starts" << endl;
 	//first step determine single-photon purities on Iso1 and Iso2 axes
 	//for integral 0-90 GeV, fit should not depend on initial values!  
 	//give initial values for purity fraction -j1 overall purity for leg 1 
 	  RooRealVar *j1=NULL;RooFormulaVar *fsig1=NULL;
+	  RooRealVar *j2=NULL;RooFormulaVar *fsig2=NULL;
 	  j1 = new RooRealVar("j1","j1",0.3,0,1);
+	  j2 = new RooRealVar("j2","j2",0.3,0,1);
 	  fsig1 = new RooFormulaVar("fsig1","fsig1","j1",RooArgList(*j1));
+	  fsig2 = new RooFormulaVar("fsig2","fsig2","j2",RooArgList(*j2));
 	  
 	  //produces binned RooDataHist also when RooRealVar input and weights are unbinned
 	  RooArgSet var;
@@ -1052,39 +1110,45 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	  //the sum of the coefficients is enforced to be one,and the coefficient of the last PDF is calculated from that condition.
 	  //ArgList of coefficients -1 of roohistpdf
 	  RooAddPdf *model_axis1=NULL;
+	  // do ML fit of pdf to unbinned data
+	  // weights are supported in unbinned dataset
 	  model_axis1 = new RooAddPdf("model_axis1","model_axis1",RooArgList(*drconepdf_axis1,*dsidebpdf_axis1),RooArgList(*fsig1),kFALSE);
 	  //if does not converge take NumCPU strategy 2
 	  RooFitResult *firstpass1;
-	  TFile resFile(Form("../plots/March18/massbinned20_4bins/fitresult_%s_%s_sumw2erroff_%u_%s_range_%u_%u.root",(truthfit)? "truth": "rcone_sideb",(EBEB) ? "EBEB": "notEBEB",im,cut_s.Data(),startbin_q,endbin_q),"RECREATE"); 
+	  TFile resFile(Form("%sfitresult_%s_%s_sumw2erroff_%u_%s_range_%u_%u.root",dir.Data(),(truthfit)? "truth": "rcone_sideb",(EBEB) ? "EBEB": "nEBEB",im,cut_s.Data(),startbin_q,endbin_q),"RECREATE"); 
 	  //second fit with sumw2error on for PULL fct= (ptrue-pmeas)/sigma_meas
 	  //if does not converge take NumCPU strategy 2
-	 //SumW2Error takes statistics of MC (weights) into account
-	 // By default the fit is executed through the MINUIT commands MIGRAD, HESSE and MINOS in succession 
-	 //firstpass1 = model_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kTRUE),Save(kTRUE));
-	 cout << "firstpass1 sumw2error false" << endl;
+	 //ML fit to weighted dataset: SumW2Error takes statistics of dataset into account, scales with number of events in dataset
+	 // By default the fit is executed through the MINUIT commands MINOS, HESSE and MINOS in succession 
+	 //fit to unbinned! data (roodataset)
+	  cout << "firstpass1 sumw2error false" << endl;
 	  resFile.cd();
-	  firstpass1 = model_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kFALSE),Save(kTRUE));
+	  firstpass1 = model_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kFALSE),Verbose(kFALSE),Minos(kTRUE),Save(kTRUE));
 	  firstpass1->Print();
 	  firstpass1->Write();
 	  resFile.Write();  
 	  resFile.Close();
 	  //second fit with sumw2error on for PULL fct= (ptrue-pmeas)/sigma_meas
 	  RooAddPdf *model2_axis1=NULL;
-	  model2_axis1 = new RooAddPdf("model2_axis1","model2_axis1",RooArgList(*drconepdf_axis1,*dsidebpdf_axis1),RooArgList(*fsig1),kFALSE);
+	  model2_axis1 = new RooAddPdf("model2_axis1","model2_axis1",RooArgList(*drconepdf_axis1,*dsidebpdf_axis1),RooArgList(*fsig2),kFALSE);
 	  RooFitResult *firstpass2;
-	  TFile resFile2(Form("../plots/March18/massbinned20_4bins/fitresult_%s_%s_sumw2erron_%u_%s_range_%u_%u.root",(truthfit)? "truth": "rcone_sideb",(EBEB) ? "EBEB": "notEBEB",im,cut_s.Data(),startbin_q,endbin_q),"RECREATE"); 
+	  TFile resFile2(Form("%sfitresult_%s_%s_sumw2erron_%u_%s_range_%u_%u.root",dir.Data(),(truthfit)? "truth": "rcone_sideb",(EBEB) ? "EBEB": "nEBEB",im,cut_s.Data(),startbin_q,endbin_q),"RECREATE"); 
       cout << "firstpass2 sumw2error true " << endl;
-  	  resFile.cd();
-	  firstpass2 = model2_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kTRUE),Save(kTRUE));
+  	  resFile2.cd();
+	  firstpass2 = model2_axis1->fitTo(*dset_data_axis1, NumCPU(8), Extended(false),SumW2Error(kTRUE),Verbose(kFALSE),Minos(kTRUE),Save(kTRUE));
 	  firstpass2->Print();
 	  firstpass2->Write();
 	  resFile2.Write();  
 	  resFile2.Close();
 	  if(massbinned)
 	  {
-	  	pu[im-1]=fsig1->getVal();
+	  	pu[im-1]=fsig2->getVal();
 		puerr[im-1]=fsig1->getPropagatedError(*firstpass1);
-	  	pullerr[im-1]=fsig1->getPropagatedError(*firstpass2);
+	  	pullerr[im-1]=fsig2->getPropagatedError(*firstpass2);
+	  	pullerrLo[im-1]=fabs(j2->getAsymErrorLo());
+	  	pullerrHi[im-1]=fabs(j2->getAsymErrorHi());
+	  	puerrLo[im-1]=fabs(j1->getAsymErrorLo());
+	  	puerrHi[im-1]=fabs(j1->getAsymErrorHi());
 	  }
 	  TLatex b;b.SetNDC();b.SetTextSize(0.06);b.SetTextColor(kRed);
 	  TCanvas *c1 = new TCanvas("c1","c1",1200,800);
@@ -1092,14 +1156,14 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	  c1->cd(1);
 	  TString title; 
 	  if(dohggv){
-	  //	title= Form("1d fit for hgg vertex no SumW2Error, %s, reweighted,%u rangebins: %u -  %u",(EBEB)? "EBEB": "notEBEB" ,im, startbin_q, endbin_q);
-	  	title= Form("1d fit for hgg vertex no SumW2Error, %s, reweighted,%u mass: %s",(EBEB)? "EBEB": "notEBEB" ,im,cut_s.Data());
+	  //	title= Form("1d fit for hgg vertex no SumW2Error, %s, reweighted,%u rangebins: %u -  %u",(EBEB)? "EBEB": "nEBEB" ,im, startbin_q, endbin_q);
+	  	title= Form("1d fit for hgg vertex no SumW2Error, %s, reweighted,%u mass: %s",(EBEB)? "EBEB": "nEBEB" ,im,cut_s.Data());
       }
 	  else if(dovzero){
-	  	title= Form("1d fit for vertex[0], %s, reweighted,%u",(EBEB)? "EBEB": "notEBEB" ,im);
+	  	title= Form("1d fit for vertex[0], %s, reweighted,%u",(EBEB)? "EBEB": "nEBEB" ,im);
 	  }
 	  else if(dowv){
-	  	title= Form("1d fit for worst isolation, %s, reweighted,%u",(EBEB)? "EBEB": "notEBEB" ,im);
+	  	title= Form("1d fit for worst isolation, %s, reweighted,%u",(EBEB)? "EBEB": "nEBEB" ,im);
 	  }
    //lin plot
   	  RooPlot *frame1bla;
@@ -1135,16 +1199,16 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	  frame1logbla->Draw();
 	  leg->Draw();
 	  b.DrawLatex(0.55,0.7,"PRELIMINARY");
-	  model_axis1->Print();
-	  dset_data_axis1->Print();
+//	  model_axis1->Print();
+	 // dset_data_axis1->Print();
 	  //save fit plots
 	  TString titleout;
-//	  if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_varbinning%u_range%u_%u",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",im,startbin_q, endbin_q);
-	 // if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_varbinning_startb_%u_%u_sigcomp",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",startbin_q,im);
-	  if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_%s_startb_%u_%u_sigcomp",(EBEB)? "EBEB": "notEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
+//	  if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_varbinning%u_range%u_%u",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",im,startbin_q, endbin_q);
+	 // if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_varbinning_startb_%u_%u_sigcomp",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",startbin_q,im);
+	  if(dohggv) titleout= Form("%s_reweight_%s_hggvtx_noSUMW2_%s_startb_%u_%u_sigcomp",(EBEB)? "EBEB": "nEBEB",(truthfit)? "truth": "rcone_sideb",cut_s.Data(),startbin_q,im);
 	  else if(dovzero) titleout= "nooverflow_reweight_fulletarange_rcone_sideband_vzero";
 	  else if(dowv) titleout= "nooverflow_reweight_fulletarange_rcone_sideband_wv";
-	  const char* outfile=Form("../plots/March18/massbinned20_4bins/roofit_%s_%s", (isdata)? "data": "mc",titleout.Data());
+	  const char* outfile=Form("%sroofit_%s_%s",dir.Data(), (isdata_q)? "data": "mc",titleout.Data());
 	  c1->SaveAs(Form("%s_lin.png",outfile));c1->SaveAs(Form("%s_lin.root",outfile));c1->SaveAs(Form("%s_lin.pdf",outfile));
 	  c2->SaveAs(Form("%s_log.png",outfile));c2->SaveAs(Form("%s_log.root",outfile));c2->SaveAs(Form("%s_log.pdf",outfile));
 	delete dset_data_axis1;
@@ -1162,6 +1226,7 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	delete c2;
 	delete csig;
 	delete cbkg;
+	
 	delete c_reweights;
 	delete c_reweights2;
 	delete c_rhoreweights;
@@ -1172,8 +1237,9 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 	delete c_rhoreweightsr;
 	delete c_sigmareweightsr;
 	delete c_etareweightsr;
-
-	if(!massbinned){
+	
+	
+	if(check){
 		delete w_rhornr; delete w_rhor2o; delete w_rhorn; delete w_rhor2; delete w_rhor; delete w_rhoro;
 		delete w_rhonr; delete w_rho2o; delete w_rhon; delete w_rho2; delete w_rho; delete w_rhoo;
 		delete w_sigmarnr; delete w_sigmar2o; delete w_sigmarn; delete w_sigmar2;
@@ -1185,6 +1251,15 @@ int do1dfit(RooDataSet *dset_data_axis1,RooDataSet * dset_sigcut,RooDataSet* dse
 		delete w_diphoptrnr; delete w_diphoptr2o; delete w_diphoptrn; delete w_diphoptr2; delete w_diphoptr; delete w_diphoptro;
 		delete w_diphoptnr; delete w_diphopt2o; delete w_diphoptn; delete w_diphopt2; delete w_diphopt; delete w_diphopto;
 		
+		delete tw_rhornr; delete tw_rhor2o; delete tw_rhorn; delete tw_rhor2; delete tw_rhor; delete tw_rhoro;
+		delete tw_rhonr; delete tw_rho2o; delete tw_rhon; delete tw_rho2; delete tw_rho; delete tw_rhoo;
+		delete tw_sigmarnr; delete tw_sigmar2o; delete tw_sigmarn; delete tw_sigmar2;
+		delete tw_sigmanr; delete tw_sigma2o; delete tw_sigman; delete tw_sigma2; 
+		delete tw_ptrnr; delete tw_ptr2o; delete tw_ptrn; delete tw_ptr2; delete tw_ptr; delete tw_ptro;
+		delete tw_ptnr; delete tw_pt2o; delete tw_ptn; delete tw_pt2; delete tw_pt; delete tw_pto;
+		delete tw_etarnr; delete tw_etar2o; delete tw_etarn; delete tw_etar2; delete tw_etar; delete tw_etaro;
+		delete tw_etanr; delete tw_eta2o; delete tw_etan; delete tw_eta2; delete tw_eta; delete tw_etao;
+		delete tw_diphoptrnr; delete tw_diphoptr2o; delete tw_diphoptrn; delete tw_diphoptr2; delete tw_diphoptr; delete tw_diphoptro;
 	}
 
 	print_mem();

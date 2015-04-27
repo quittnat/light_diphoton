@@ -82,14 +82,14 @@ RooRealVar *rooweight=NULL;
 RooDataSet *dataset_data = NULL;
 RooDataSet *dataset_rcone = NULL;
 RooDataSet *dataset_sideband = NULL;
-RooDataSet *dataset_testsig = NULL;
+//RooDataSet *dataset_testsig = NULL;
 RooDataSet *dataset_test1 = NULL;
-RooDataSet *dataset_testbkg = NULL;
+//RooDataSet *dataset_testbkg = NULL;
 RooDataSet *dataset_test2 = NULL;
-RooDataSet *dset_data = NULL;
-RooDataSet *dset_rcone = NULL;
+//RooDataSet *dset_data = NULL;
+//RooDataSet *dset_rcone = NULL;
 RooDataSet *dset_testsig1 = NULL;
-RooDataSet *dset_sideb = NULL;
+//RooDataSet *dset_sideb = NULL;
 RooDataSet *dset_testbkg1 = NULL;
 RooRealVar *binning_roovar1=NULL;
 TString eta_q;
@@ -98,19 +98,19 @@ Int_t startbin_q=-100;
 Int_t  endbin_q=-100;
 Int_t ntot_q=-100;
 Int_t nq_q=-100;
-bool truthfit;
+bool truthfit=kFALSE;
 bool massbinned=kTRUE;
 Bool_t isdata_q=kTRUE;
-Bool_t EBEB;
+Bool_t EBEB=kTRUE;
 bool debug=kFALSE;
-bool check=kFALSE;
+bool check=kTRUE;
 
 //bins for reweihgting
 RooBinning tbins (0,9); 
 const int n_ptbins_forreweighting = 5;
 Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,40,60,100,150,999};
 const int n_diphoptbins_forreweighting = 4;
-Float_t diphoptbins_forreweighting[n_diphoptbins_forreweighting+1]={0,40,50,200,2000};
+Float_t diphoptbins_forreweighting[n_diphoptbins_forreweighting+1]={0,40,50,200,7000};
 //const int n_ptbins_forreweighting =6;
 //Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,35,50,80,100,200,999};
 //const int n_diphoptbins_forreweighting = 6;
@@ -255,12 +255,12 @@ TH1F *tw_ptro= new TH1F("tw_ptro","tw_ptro",wbins ,wxmin,12.);
 //define functions for fit
 void get_roodset_from_ttree(TDirectoryFile *f, TString treename, RooDataSet* &roodset);
 //int do1dfit(RooDataSet *dset_data_axis1,RooDataSet *dset_sig_axis1,RooDataSet *dset_bkg_axis1,int im);
-int do1dfit(RooDataSet *dset_data_axis1,RooDataSet* dset_sigcut, RooDataSet* dset_bkgcut,RooDataSet *dset_sig_axis1,RooDataSet *dset_bkg_axis1,RooDataSet* dset_testsig,RooDataSet* dset_testbkg, int im, double pu[], double puerr[],double puerrLo[],double puerrHi[],double pullerr[],double pullerrLo[],double pullerrHi[]);
+int do1dfit(RooDataSet *dset_data_axis1,RooDataSet* dset_sigcut, RooDataSet* dset_bkgcut,RooDataSet *dset_sig_axis1,RooDataSet *dset_bkg_axis1,RooDataSet* dset_testsig,RooDataSet* dset_testbkg, int im, double pu[], double puerr[],double pullerr[],double data_en[]);
 /*
-void reweight_rhosigma(TH1F* weight_rho, TH1F* weight_rhoo,TH2F*weight_rhon,TH2F*weight_rho2o,TH2F* weight_rhonr, TH2F* weight_rho2,TH2F*weight_sigman,TH2F* weight_sigma2o,TH2F* weight_sigmanr, TH2F* weight_sigma2,RooDataSet **dset, RooDataSet *dsetdestination, bool deleteold = kTRUE);
-void reweight_pt_1d(TH1F* weight_pt,TH1F* weight_pto,TH2F*weight_ptn,TH2F* weight_pt2o,TH2F* weight_ptnr,TH2F*weight_pt2,RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
-void reweight_diphotonpt_1d(TH1F* weight_diphopt,TH1F* weight_diphopto,TH2F*weight_diphoptn,TH2F* weight_diphopt2o,TH2F*weight_diphoptnr,TH2F*weight_diphopt2,RooDataSet **dset, RooDataSet *dsetdestination);
-void reweight_eta_1d(TH1F* weight_eta,TH1F* weight_etao,TH2F*weight_etan,TH2F* weight_eta2o,TH2F* weight_etanr,TH2F*weight_eta2,RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
+void reweight_rhosigma(RooDataSet **dset, RooDataSet *dsetdestination, bool deleteold = kTRUE);
+void reweight_pt_1d(RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
+void reweight_diphotonpt_1d(RooDataSet **dset, RooDataSet *dsetdestination);
+void reweight_eta_1d(RooDataSet **dset, RooDataSet *dsetdestination, int numvar);
 */
 
 void reweight_rhosigma(TH1F* weight_rho=NULL, TH1F* weight_rhoo=NULL,TH2F*weight_rhon=NULL,TH2F*weight_rho2o=NULL,TH2F* weight_rhonr=NULL, TH2F* weight_rho2=NULL,TH2F*weight_sigman=NULL,TH2F* weight_sigma2o=NULL,TH2F* weight_sigmanr=NULL, TH2F* weight_sigma2=NULL,RooDataSet **dset=NULL, RooDataSet *dsetdestination=NULL, bool deleteold = kTRUE);
@@ -270,8 +270,8 @@ void reweight_diphotonpt_1d(TH1F* weight_diphopt=NULL,TH1F* weight_diphopto=NULL
 
 void ratioplot(RooDataSet *data_axis1, RooDataSet *truth_axis1, Bool_t logplot);
 //double quantiles(TH1F* mass, int ntot, int nqtemp,int startn, int endn, TString eta_q,double _proptemp[], double dpmqtemp[]);
-int quantiles(TH1F* mass,double _proptemp[], double dpmqtemp[]);
-int plot_purity_massbin(double mass[],double masserr[],double pur[],double purerr[],double puerrLo[],double puerrHi[], bool errb) ; 
+int quantiles(TH1D* mass,double _proptemp[], double dpmqtemp[]);
+int plot_purity_massbin(double mass[],double masserr[],double pur[],double purerr[], bool errb) ; 
 int prep_dataset(Bool_t isdata=kTRUE,TString eta="EBEB", Bool_t truthf=kFALSE,int ntotbins=10,int startbin=0, int endbin=2);
  void print_mem();
 const int numcpu=1;

@@ -40,6 +40,7 @@ const int split=2;
 //int plot_pull(TGraphAsymmErrors* grpull,double dpmass[], double purity[], double w2errL[],double w2errH[],Bool_t truthcheck)  
 int plot_pull(TGraphAsymmErrors* grpull,double dpmass[], double purity[], double w2err[],Bool_t truthcheck)  
 {
+	cout << "truthcheck "<<  truthcheck << endl;
 	  TH1F::SetDefaultSumw2(kTRUE);
 //plot projections-should be gaussian
 //plot as a function of diphoton mass    
@@ -57,16 +58,6 @@ int plot_pull(TGraphAsymmErrors* grpull,double dpmass[], double purity[], double
 		for(int k=0; k< nbins;k++)
 		{   
 		    ppull[k]=((grpull->GetY()[k])-purity[k])/w2err[k];
-			/*
-			if(purity[k] <= (grpull->GetY()[k]))
-			{
-				ppull[k]=((grpull->GetY()[k])-purity[k])/w2errH[k];
-			}
-			else if(purity[k] > (grpull->GetY()[k]))
-			{
-				ppull[k]=((grpull->GetY()[k])-purity[k])/w2errL[k];
-			}
-			*/
 		    perrxl[k]=grpull->GetErrorXlow(k);
 		    perrxh[k]=grpull->GetErrorXhigh(k);
 		//	cout <<" grpull->GetY()[k] "<< grpull->GetY()[k] << " purity[k] " << purity[k] << " w2errL[k] " << w2errL[k] << " w2errH[k] " << w2errH[k] << " pull[k] " << ppull[k] << " errxl " <<perrxl[k] << " errxh" << perrxh[k] <<endl;
@@ -115,8 +106,10 @@ int plot_pull(TGraphAsymmErrors* grpull,double dpmass[], double purity[], double
 	g->Draw("SAME");
 //	cpull->Print(Form("%s%s_%s_pull_%s_template_%u_masscut.root",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"root");
 //	cpull->Print(Form("%s%s_%s_pull_%s_template_%u_masscut.png",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"png");
-	cpull->Print(Form("%s%s_%s_pull_%s_templateunweighted_%u_masscut.root",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"root");
-	cpull->Print(Form("%s%s_%s_pull_%s_templateunweighted_%u_masscut.png",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"png");
+cpull->Print(Form("%s%s_%s_pull_%s_template_%u.root",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"root");
+cpull->Print(Form("%s%s_%s_pull_%s_template_%u.png",dir2.Data(),(truthcheck)? "truth": "rcone_side",date.Data(),eta,nbins),"png");
+//	cpull->Print(Form("%srcone_sidebtemp_%s_%s_pull_%s_%u.root",dir2.Data(),(truthcheck)? "nonrew_withtruthinfo": "rew_andnonrew",date.Data(),eta,nbins),"root");
+//	cpull->Print(Form("%srcone_sidebtemp_%s_%s_pull_%s_%u.png",dir2.Data(),(truthcheck)? "nonrew_withtruthinfo": "rew_andnonrew",date.Data(),eta,nbins),"png");
 	return 0;
 }
 //TODO etGGa_q definieren
@@ -161,24 +154,16 @@ else
 }
 assert(grcp);
 // ************************read in mass bins and purity
-
-//const char *path=Form("purity_%s_truth_sumw2erron_%s_massbin_20_range",date.Data(),eta);
-//const char *path=Form("purity_2015-03-31_truth_sumw2erron_%s_massbin_20_range",eta);
+//truth templates:
 const char *path=Form("purity_2015-04-08_truth_sumw2erron_%s_massbin_20_range",eta);
-const char *path2=Form("purity_2015-04-23_rcone_sideb_sumw2erron_%s_massbin_20_range",eta);
-//const char *path2=Form("purity_2015-04-08_rcone_sideb_sumw2erron_%s_massbin_20_range",eta);
-//const char *path2=Form("purity_%s_truth_sumw2erron_%s_massbin_20_range",date.Data(),eta);
-//const char *path2=Form("purity_%s_rcone_sideb_sumw2erron_%s_massbin_20_range",date.Data(),eta);
-//const char *path2=Form("purity_2015-03-31_truth_sumw2erron_%s_massbin_20_range",eta);
-//const char *path=Form("purity_2015-03-31_rcone_sideb_sumw2erron_%s_massbin_20_range",eta);
-//dir=Form("../plots/April8/%s/massbinned20_4bins_truthreweight/",eta);
 dir=Form("../plots/April8/%s/massbinned20_4bins_truthreweight/",eta);
-dir2=Form("../plots/April17/%s/massbinned20_4bins/",eta);
-//dir=Form("../plots/March31/%s/massbinned20_4bins_reweight/",eta);
-//dir=Form("../plots/March31/%s/massbinned20_4bins_5binspacing_reweight/",eta);
-//dir2=Form("../plots/April8/%s/massbinned20_4bins_rconesideband/",eta);
-//TGraphAsymmErrors* gr_n1=new TGraphAsymmErrors(); TGraphAsymmErrors* gr_n2=new TGraphAsymmErrors();
-//TGraphAsymmErrors* gr_n3=new TGraphAsymmErrors(); TGraphAsymmErrors* gr_n4=new TGraphAsymmErrors();
+/// if template unreweighted
+//const char *path=Form("purity_2015-04-29_rcone_sideb_sumw2erron_%s_massbin_20_range",eta);
+//dir=Form("../plots/April29/%s/massbinned20_4bins_nonweighted/",eta);
+//reweighted templates
+const char *path2=Form("purity_2015-04-29_rcone_sideb_sumw2erron_%s_massbin_20_range",eta);
+dir2=Form("../plots/April29/%s/massbinned20_4bins/",eta);
+
 TGraphErrors* gr_n1=new TGraphErrors(); TGraphErrors* gr_n2=new TGraphErrors();
 TGraphErrors* gr_n3=new TGraphErrors(); TGraphErrors* gr_n4=new TGraphErrors();
 int	nbins1=0; int	nbins2=0;
@@ -215,15 +200,15 @@ assert(f4);
 TGraphErrors* gr4=(TGraphErrors*)f4->Get("Graph");
 assert(gr4);
 
-	gr_tn1=gr1;
-	gr_tn2=gr2;
-	gr_tn3=gr3;
-	gr_tn4=gr4;
-	nbinst1=(gr1->GetN());
-	nbinst2=(gr2->GetN());
-	nbinst3=(gr3->GetN());
-	nbinst4=(gr4->GetN());
-	cout << "nbins1 truth " << nbins1<< "nbins2 truth" << nbins2<<endl;
+gr_tn1=gr1;
+gr_tn2=gr2;
+gr_tn3=gr3;
+gr_tn4=gr4;
+nbinst1=(gr1->GetN());
+nbinst2=(gr2->GetN());
+nbinst3=(gr3->GetN());
+nbinst4=(gr4->GetN());
+cout << "nbins1 truth " << nbins1<< "nbins2 truth" << nbins2<<endl;
 
 //*************************rcone and sideband *********************************//
 f11=new TFile(Form("%s%s_0_5.root",dir2.Data(),path2),"READ");
@@ -246,24 +231,23 @@ assert(f44);
 TGraphErrors* gr44=(TGraphErrors*)f44->Get("Graph");
 assert(gr44);
 
-
-	gr_n1=gr11;
-	gr_n2=gr22;
-	gr_n3=gr33;
-	gr_n4=gr44;
-	nbins1=(gr11->GetN());
-	nbins2=(gr22->GetN());
-	nbins3=(gr33->GetN());
-	nbins4=(gr44->GetN());
-	cout << "nbins1 rcone sideband " << nbins1<< "nbins2" << nbins2<<endl;
-
-
+gr_n1=gr11;
+gr_n2=gr22;
+gr_n3=gr33;
+gr_n4=gr44;
+nbins1=(gr11->GetN());
+nbins2=(gr22->GetN());
+nbins3=(gr33->GetN());
+nbins4=(gr44->GetN());
+cout << "nbins1 rcone sideband " << nbins1<< "nbins2" << nbins2<<endl;
 
 nbins=nbins1+nbins2+nbins3+nbins4;
 tnbins=nbinst1+nbinst2+nbinst3+nbinst4;
 if(nbins!=nbins) {return -1;}
 cout << "nbins " << nbins << endl;
 double *pdpmasst_all=new double[nbins];
+double *masstrue=new double[nbins];
+double *ptr=new double[nbins];
 double *ratio=new double[nbins];
 double *ppurityt_all=new double[nbins];
 double *pw2errt_all=new double[nbins];
@@ -289,7 +273,6 @@ cout << "third filling " << endl;
 for(int k=0;k<nbins3; k++ )
 {
 	gr_n3->GetPoint(k,pdpmass_all[k+nbins1+nbins2],ppurity_all[k+nbins1+nbins2]);
-//	pw2errH_all[k+nbins1+nbins2]=gr_n2->GetErrorYhigh(k);
 	pw2err_all[k+nbins1+nbins2]=gr_n3->GetErrorY(k);
 	cout << "k " << k+nbins1+nbins2 << "dpmass " << pdpmass_all[k+nbins1+nbins2] << "purity " << ppurity_all[k+nbins1+nbins2] << "w2err_all[k] " << pw2err_all[k+nbins1+nbins2] <<endl;
 } 
@@ -300,7 +283,9 @@ for(int k=0;k<nbins4; k++ )
 //	pw2errH_all[k+nbins1+nbins2+nbins3]=gr_n4->GetErrorYhigh(k);
 	pw2err_all[k+nbins1+nbins2+nbins3]=gr_n4->GetErrorY(k);
 	cout << "k " << k+nbins1+nbins2+nbins3 << "dpmass " << pdpmass_all[k+nbins1+nbins2+nbins3] << "purity " << ppurity_all[k+nbins1+nbins2+nbins3]  << "w2err_all[k] " << pw2err_all[k+nbins1+nbins2+nbins3] <<endl;
-} 
+}
+//truth templates
+//
 for(int k=0;k<nbinst1; k++ )
 {
 	gr_tn1->GetPoint(k,pdpmasst_all[k],ppurityt_all[k]);
@@ -324,19 +309,33 @@ for(int k=0;k<nbinst4; k++ )
 	pw2errt_all[k+nbinst1+nbinst2+nbinst3]=gr_tn4->GetErrorY(k);
 	cout << "k " << k+nbinst1+nbinst2+nbinst3 << "dpmass " << pdpmasst_all[k+nbinst1+nbinst2+nbinst3] << "purity " << ppurityt_all[k+nbinst1+nbinst2+nbinst3]  << "w2err_all[k] " << pw2errt_all[k+nbinst1+nbinst2+nbinst3] <<endl;
 }
+
 for(int k=0; k< nbins ;k++)
 {
-	ratio[k]=(ppurity_all[k]-ppurityt_all[k])/ppurityt_all[k];
+	grcp->GetPoint(k,masstrue[k],ptr[k]);
+	cout << "ptr[k]" << ptr[k] << endl;
+	if(truth)
+	{
+	ratio[k]=(ptr[k]-ppurityt_all[k])/ptr[k];
+	}
+	else if(!truth)
+	{
+		ratio[k]=(ptr[k]-ppurity_all[k])/ptr[k];
+//
+//     for template comp
+//		ratio[k]=(ppurityt_all[k]-ppurity_all[k])/ppurityt_all[k];
+	}
 }
 
-TGraphErrors *gratio= new TGraphErrors(nbins,pdpmasst_all,ratio);
+TGraphErrors *gratio= new TGraphErrors(nbins,masstrue,ratio);
         gratio->SetMarkerStyle(20);
         gratio->SetTitle("");
 cres->cd();
 
- TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
-   pad1->SetBottomMargin(0); // Upper and lower plot are joined
-   pad1->SetGridx();         // Vertical grid
+TPad *pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.15);
+TPad *pad1 = new TPad("pad1", "pad1", 0., 0.15, 1., 1.0);
+pad1->SetBottomMargin(0); // Upper and lower plot are joined
+pad1->SetGridx();         // Vertical grid
 pad1->SetGridy();
 pad1->Draw();
 pad1->cd(); 
@@ -344,13 +343,15 @@ pad1->SetLogx();
 
 
 
-gratio->GetXaxis()->SetTitle("Diphoton mass (GeV)");
+gratio->GetXaxis()->SetTitle("Diphoton mass [GeV]");
 
 grcp->GetYaxis()->SetTitle("purity");
 grcp->GetXaxis()->SetTitle("diphoton mass [GeV]");
 //grcp->GetXaxis()->SetLimits(10.,7000.);
-//gratio->GetXaxis()->SetRange(50,3000);
-grcp->GetYaxis()->SetRangeUser(.2,0.9);
+gratio->GetXaxis()->SetLimits(50,3000);
+gratio->GetYaxis()->SetRangeUser(-0.5,0.5);
+grcp->GetXaxis()->SetLimits(50,3000);
+grcp->GetYaxis()->SetRangeUser(0.,0.9);
 grcp->GetYaxis()->SetTitleOffset(1.2);
  
 grcp->SetMarkerStyle(20);grcp->SetMarkerColor(kBlack); grcp->SetLineColor(kBlack); grcp->SetMarkerSize(1.3);
@@ -360,11 +361,11 @@ gr3->SetMarkerStyle(20);gr3->SetMarkerColor(kBlue); gr3->SetLineColor(kBlue); gr
 gr4->SetMarkerStyle(20);gr4->SetMarkerColor(kBlue); gr4->SetLineColor(kBlue); gr4->SetMarkerSize(1.3);
 gr11->SetMarkerStyle(20);gr11->SetMarkerColor(kRed); gr11->SetLineColor(kRed); gr11->SetMarkerSize(1.3);
 gr22->SetMarkerStyle(20);gr22->SetMarkerColor(kRed); gr22->SetLineColor(kRed); gr22->SetMarkerSize(1.3);
-gr33->SetMarkerStyle(20);gr33->SetMarkerColor(kRed); gr33->SetLineColor(kRed); gr33->SetMarkerSize(1.3);
-gr44->SetMarkerStyle(20);gr44->SetMarkerColor(kRed); gr44->SetLineColor(kRed); gr44->SetMarkerSize(1.3);
+gr33->SetMarkerStyle(20);gr33->SetMarkerColor(kRed); gr33->SetLineColor(kRed); gr33->SetMarkerSize(1.3);gr44->SetMarkerStyle(20);gr44->SetMarkerColor(kRed); gr44->SetLineColor(kRed); gr44->SetMarkerSize(1.3);
 leg->AddEntry(grcp,Form("truth %s",eta),"p");    
 leg->AddEntry(gr1,Form("truth fit rew %s",eta),"p");    
-leg->AddEntry(gr11,Form("template fit not rew%s",eta),"p");    
+//leg->AddEntry(gr1,Form("template fit non rew %s",eta),"p");    
+leg->AddEntry(gr11,Form("template fit rew %s",eta),"p");    
 grcp->SetTitle(Form("mgg %s purity",eta));
 
 grcp->Draw("AP");
@@ -384,42 +385,61 @@ pad1->SetTicks(0,2);
 pad1->Update();
 
 		 
-   TPad *pad2 = new TPad("pad2", "pad2", 0, 0.05, 1, 0.3);
-   pad2->SetTopMargin(0);
-   pad2->SetBottomMargin(0.4);
+ //  pad2->SetTopMargin(0);
+   pad2->SetBottomMargin(0.3);
    pad2->SetTicky();
    pad2->SetGridx(); // vertical grid
+   pad2->SetGridy(); // vertical grid
+   pad2->SetLogx(); // vertical grid
    pad2->Draw();
    pad2->cd();
-gratio->Draw("ep");
-gratio->GetYaxis()->SetTitle("(p_temp-p_true)/p_true");
+   pad2->Update();
+gratio->Draw("AP");
+pad2->Update();
+if(truth)
+{
+gratio->GetYaxis()->SetTitle("(ptr-ptrrew)/ptr");
+//gratio->GetYaxis()->SetTitle("(ptr-ptpnrew)/ptr");
+}
+else {gratio->GetYaxis()->SetTitle("(ptnrew-ptprew)/ptnrew");}
+//else {gratio->GetYaxis()->SetTitle("(ptr-ptprew)/ptr");}
+//gratio->GetYaxis()->SetTitle("(ptpr-ptpnr)/ptr");
    gratio->GetYaxis()->SetNdivisions(505);
-   gratio->GetYaxis()->SetTitleSize(18);
+   gratio->GetYaxis()->SetTitleSize(14);
    gratio->GetYaxis()->SetTitleFont(43);
    gratio->GetYaxis()->SetTitleOffset(1.05);
    gratio->GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
    gratio->GetYaxis()->SetLabelSize(15);
  // X axis ratio plot settings
-   gratio->GetXaxis()->SetTitleSize(20);
+   gratio->GetXaxis()->SetTitleSize(18);
    gratio->GetXaxis()->SetTitleFont(43);
    gratio->GetXaxis()->SetTitleOffset(4.);
    gratio->GetXaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
    gratio->GetXaxis()->SetLabelSize(15);
    //   TLine *r = new TLine(0.,ratio,9.,ratio);
-cres->Update();
- 
+   pad2->Update();
+  //cres->Update();
+pad2->Update(); 
 
 
-cres->Print(Form("%spurity_%s_%s_templateunweighted_truth_comp.root",dir2.Data(),date.Data(),eta),"root");
-cres->Print(Form("%spurity_%s_%s_templateunweighted_truth_comp.png",dir2.Data(),date.Data(),eta),"png");
-//cres->Print(Form("%spurity_%s_%s_truth_comp.root",dir2.Data(),date.Data(),eta),"root");
-//cres->Print(Form("%spurity_%s_%s_truth_comp.png",dir2.Data(),date.Data(),eta),"png");
+//cres->Print(Form("%spurity_%s_%s_template_comp.root",dir2.Data(),date.Data(),eta),"root");
+//cres->Print(Form("%spurity_%s_%s_template_comp.png",dir2.Data(),date.Data(),eta),"png");
+cres->Print(Form("%spurity_%s_%s_template_truthcomp_ratio%s.root",dir2.Data(),date.Data(),eta,(truth)? "truthtemp": "rconesidebtemp"),"root");
+cres->Print(Form("%spurity_%s_%s_template_truthcomp_ratio%s.png",dir2.Data(),date.Data(),eta,(truth)? "truthtemp": "rconesidebtemp"),"png");
+//cres->Print(Form("%spurity_%s_%s_template_truthcomp_ratio%s.root",dir2.Data(),date.Data(),eta,(truth)? "templatenonrew": "temptotempnonrew"),"root");
+//cres->Print(Form("%spurity_%s_%s_template_truthcomp_ratio%s.png",dir2.Data(),date.Data(),eta,(truth)? "templatenonrew": "temptotempnonrew"),"png");
+if(truth)
+{
+plot_pull(grcp,pdpmasst_all,ppurityt_all,pw2errt_all,truth);
+
+}
+else if(!truth)
+{
 plot_pull(grcp,pdpmass_all,ppurity_all,pw2err_all,truth);
+}
 delete[] pdpmass_all;
 delete[] ppurity_all;
 delete[] pw2err_all;
-//delete[] pw2errL_all;
-//delete[] pw2errH_all;
 
 return 0;
 }

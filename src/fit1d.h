@@ -107,10 +107,10 @@ bool check=kTRUE;
 
 //bins for reweihgting
 RooBinning tbins (0,9); 
-const int n_ptbins_forreweighting = 5;
-Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,40,60,100,150,999};
+const int n_ptbins_forreweighting = 13;
+Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,25,30,35,40,50,60,70,100,120,150,200,400,3000. };
 const int n_diphoptbins_forreweighting = 4;
-Float_t diphoptbins_forreweighting[n_diphoptbins_forreweighting+1]={0,40,50,200,7000};
+Float_t diphoptbins_forreweighting[n_diphoptbins_forreweighting+1]={0,40,50,200,7000.};
 //const int n_ptbins_forreweighting =6;
 //Float_t ptbins_forreweighting[n_ptbins_forreweighting+1]={20,35,50,80,100,200,999};
 //const int n_diphoptbins_forreweighting = 6;
